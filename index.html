@@ -4,10 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ESTOQUE DE NÃO CONFORMIDADE (DIMEP)</title>
-    <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
     <style>
         :root {
             --green-900: #0d3320;
@@ -70,7 +66,6 @@
             -moz-osx-font-smoothing: grayscale;
         }
 
-        /* ============ HEADER ============ */
         .header {
             background: linear-gradient(135deg, var(--green-800) 0%, var(--green-700) 40%, var(--green-600) 100%);
             color: white;
@@ -144,27 +139,16 @@
             border-radius: 50%;
             display: inline-block;
         }
-        .dot-pendente {
-            background: var(--amber-500);
-            box-shadow: 0 0 8px rgba(245, 158, 11, 0.6);
-        }
-        .dot-refugo {
-            background: var(--red-500);
-            box-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
-        }
-        .dot-retrabalho {
-            background: var(--blue-500);
-            box-shadow: 0 0 8px rgba(59, 130, 246, 0.6);
-        }
+        .dot-pendente { background: var(--amber-500); box-shadow: 0 0 8px rgba(245, 158, 11, 0.6); }
+        .dot-refugo { background: var(--red-500); box-shadow: 0 0 8px rgba(239, 68, 68, 0.6); }
+        .dot-retrabalho { background: var(--blue-500); box-shadow: 0 0 8px rgba(59, 130, 246, 0.6); }
 
-        /* ============ MAIN CONTENT ============ */
         .main-container {
             max-width: 1400px;
             margin: 0 auto;
             padding: 24px 20px 40px;
         }
 
-        /* ============ TOOLBAR ============ */
         .toolbar {
             display: flex;
             flex-wrap: wrap;
@@ -263,17 +247,7 @@
             box-shadow: var(--shadow-lg);
             transform: translateY(-1px);
         }
-        .btn-add:active {
-            transform: translateY(0);
-            box-shadow: var(--shadow-sm);
-        }
-        .btn-add .plus-icon {
-            font-size: 1.3rem;
-            font-weight: 700;
-            line-height: 1;
-        }
 
-        /* ============ CARDS GRID ============ */
         .cards-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -285,23 +259,10 @@
             padding: 60px 20px;
             color: var(--gray-500);
         }
-        .empty-state .empty-icon {
-            font-size: 4rem;
-            margin-bottom: 16px;
-            opacity: 0.5;
-        }
-        .empty-state h3 {
-            font-size: 1.3rem;
-            color: var(--gray-600);
-            margin-bottom: 6px;
-            font-weight: 600;
-        }
-        .empty-state p {
-            font-size: 0.9rem;
-            color: var(--gray-400);
-        }
+        .empty-state .empty-icon { font-size: 4rem; margin-bottom: 16px; opacity: 0.5; }
+        .empty-state h3 { font-size: 1.3rem; color: var(--gray-600); margin-bottom: 6px; font-weight: 600; }
+        .empty-state p { font-size: 0.9rem; color: var(--gray-400); }
 
-        /* ============ CARD ============ */
         .card {
             background: var(--white);
             border-radius: var(--radius-lg);
@@ -319,17 +280,9 @@
             transform: translateY(-3px);
             border-color: var(--gray-200);
         }
-        .card.status-pendente {
-            border-left: 4px solid var(--amber-500);
-        }
-        .card.status-refugo {
-            border-left: 4px solid var(--red-500);
-            background: #fffafa;
-        }
-        .card.status-retrabalho {
-            border-left: 4px solid var(--blue-500);
-            background: #fafcff;
-        }
+        .card.status-pendente { border-left: 4px solid var(--amber-500); }
+        .card.status-refugo { border-left: 4px solid var(--red-500); background: #fffafa; }
+        .card.status-retrabalho { border-left: 4px solid var(--blue-500); background: #fafcff; }
         .card-photo-wrapper {
             position: relative;
             width: 100%;
@@ -345,9 +298,7 @@
             object-fit: cover;
             transition: transform 0.4s ease;
         }
-        .card-photo-wrapper:hover img {
-            transform: scale(1.06);
-        }
+        .card-photo-wrapper:hover img { transform: scale(1.06); }
         .card-photo-wrapper .photo-overlay {
             position: absolute;
             inset: 0;
@@ -389,18 +340,9 @@
             pointer-events: none;
             box-shadow: var(--shadow-sm);
         }
-        .badge-pendente {
-            background: var(--amber-500);
-            color: #fff;
-        }
-        .badge-refugo {
-            background: var(--red-500);
-            color: #fff;
-        }
-        .badge-retrabalho {
-            background: var(--blue-500);
-            color: #fff;
-        }
+        .badge-pendente { background: var(--amber-500); color: #fff; }
+        .badge-refugo { background: var(--red-500); color: #fff; }
+        .badge-retrabalho { background: var(--blue-500); color: #fff; }
         .card-body {
             padding: 16px 18px;
             flex: 1;
@@ -424,14 +366,8 @@
             color: var(--gray-600);
             align-items: center;
         }
-        .card-info-row .info-item {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-        .card-info-row .info-icon {
-            font-size: 0.9rem;
-        }
+        .card-info-row .info-item { display: flex; align-items: center; gap: 5px; }
+        .card-info-row .info-icon { font-size: 0.9rem; }
         .card-quantity {
             display: inline-flex;
             align-items: center;
@@ -473,53 +409,16 @@
             letter-spacing: 0.01em;
             color: var(--gray-700);
         }
-        .btn-action:hover {
-            border-color: var(--gray-400);
-            background: var(--gray-50);
-        }
-        .btn-action.btn-refugo {
-            color: var(--red-700);
-            border-color: #fecaca;
-            background: #fff5f5;
-        }
-        .btn-action.btn-refugo:hover {
-            background: #fef2f2;
-            border-color: #f87171;
-            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.08);
-        }
-        .btn-action.btn-retrabalho {
-            color: var(--blue-700);
-            border-color: #bfdbfe;
-            background: #f5f9ff;
-        }
-        .btn-action.btn-retrabalho:hover {
-            background: #eff6ff;
-            border-color: #60a5fa;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.08);
-        }
-        .btn-action.btn-edit {
-            color: var(--green-700);
-            border-color: #b8e0c2;
-            background: #f9fdf9;
-        }
-        .btn-action.btn-edit:hover {
-            background: #f4faf5;
-            border-color: #5ca870;
-            box-shadow: 0 0 0 3px rgba(45, 122, 70, 0.08);
-        }
-        .btn-action.btn-delete {
-            color: #9ca3af;
-            border-color: #e5e7eb;
-            background: #fafafa;
-        }
-        .btn-action.btn-delete:hover {
-            color: #ef4444;
-            border-color: #fca5a5;
-            background: #fef2f2;
-            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.06);
-        }
+        .btn-action:hover { border-color: var(--gray-400); background: var(--gray-50); }
+        .btn-action.btn-refugo { color: var(--red-700); border-color: #fecaca; background: #fff5f5; }
+        .btn-action.btn-refugo:hover { background: #fef2f2; border-color: #f87171; }
+        .btn-action.btn-retrabalho { color: var(--blue-700); border-color: #bfdbfe; background: #f5f9ff; }
+        .btn-action.btn-retrabalho:hover { background: #eff6ff; border-color: #60a5fa; }
+        .btn-action.btn-edit { color: var(--green-700); border-color: #b8e0c2; background: #f9fdf9; }
+        .btn-action.btn-edit:hover { background: #f4faf5; border-color: #5ca870; }
+        .btn-action.btn-delete { color: #9ca3af; border-color: #e5e7eb; background: #fafafa; }
+        .btn-action.btn-delete:hover { color: #ef4444; border-color: #fca5a5; background: #fef2f2; }
 
-        /* ============ MODAL OVERLAY ============ */
         .modal-overlay {
             position: fixed;
             inset: 0;
@@ -531,26 +430,9 @@
             padding: 20px;
             animation: fadeIn 0.2s ease;
             backdrop-filter: blur(2px);
-            -webkit-backdrop-filter: blur(2px);
         }
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-            to {
-                opacity: 1;
-            }
-        }
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px) scale(0.96);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(30px) scale(0.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
         .modal-dialog {
             background: white;
             border-radius: var(--radius-xl);
@@ -561,9 +443,6 @@
             box-shadow: var(--shadow-xl);
             animation: slideUp 0.3s cubic-bezier(0.22, 0.61, 0.36, 1);
             position: relative;
-        }
-        .modal-dialog.wide {
-            max-width: 800px;
         }
         .modal-header {
             padding: 20px 24px;
@@ -577,415 +456,118 @@
             z-index: 5;
             border-radius: var(--radius-xl) var(--radius-xl) 0 0;
         }
-        .modal-header h2 {
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: var(--gray-900);
-            letter-spacing: -0.01em;
-        }
+        .modal-header h2 { font-size: 1.2rem; font-weight: 700; color: var(--gray-900); }
         .modal-close {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            border: none;
-            background: var(--gray-100);
-            cursor: pointer;
-            font-size: 1.2rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: var(--transition);
-            color: var(--gray-600);
-            flex-shrink: 0;
+            width: 36px; height: 36px; border-radius: 50%; border: none;
+            background: var(--gray-100); cursor: pointer; font-size: 1.2rem;
+            display: flex; align-items: center; justify-content: center;
+            transition: var(--transition); color: var(--gray-600);
         }
-        .modal-close:hover {
-            background: var(--gray-200);
-            color: var(--gray-900);
-        }
-        .modal-body {
-            padding: 20px 24px;
-        }
+        .modal-close:hover { background: var(--gray-200); color: var(--gray-900); }
+        .modal-body { padding: 20px 24px; }
         .modal-footer {
-            padding: 16px 24px;
-            border-top: 1px solid var(--gray-200);
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            position: sticky;
-            bottom: 0;
-            background: white;
+            padding: 16px 24px; border-top: 1px solid var(--gray-200);
+            display: flex; justify-content: flex-end; gap: 10px;
+            position: sticky; bottom: 0; background: white;
             border-radius: 0 0 var(--radius-xl) var(--radius-xl);
         }
-        .form-group {
-            margin-bottom: 16px;
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-weight: 600; font-size: 0.85rem; color: var(--gray-700); margin-bottom: 5px; }
+        .form-group input[type="text"], .form-group input[type="number"] {
+            width: 100%; padding: 11px 14px; border: 2px solid var(--gray-200);
+            border-radius: var(--radius); font-size: 0.9rem; transition: var(--transition);
+            background: var(--gray-50); color: var(--gray-900); outline: none; font-family: inherit;
         }
-        .form-group label {
-            display: block;
-            font-weight: 600;
-            font-size: 0.85rem;
-            color: var(--gray-700);
-            margin-bottom: 5px;
-            letter-spacing: 0.01em;
-        }
-        .form-group input[type="text"],
-        .form-group input[type="number"] {
-            width: 100%;
-            padding: 11px 14px;
-            border: 2px solid var(--gray-200);
-            border-radius: var(--radius);
-            font-size: 0.9rem;
-            transition: var(--transition);
-            background: var(--gray-50);
-            color: var(--gray-900);
-            outline: none;
-            font-family: inherit;
-        }
-        .form-group input:focus {
-            border-color: var(--green-400);
-            box-shadow: 0 0 0 3px rgba(45, 122, 70, 0.08);
-            background: white;
-        }
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-        }
-        @media (max-width: 500px) {
-            .form-row {
-                grid-template-columns: 1fr;
-            }
-        }
+        .form-group input:focus { border-color: var(--green-400); box-shadow: 0 0 0 3px rgba(45, 122, 70, 0.08); background: white; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        @media (max-width: 500px) { .form-row { grid-template-columns: 1fr; } }
         .photo-upload-area {
-            border: 2px dashed var(--gray-300);
-            border-radius: var(--radius-lg);
-            padding: 20px;
-            text-align: center;
-            cursor: pointer;
-            transition: var(--transition);
-            background: var(--gray-25);
-            position: relative;
-            min-height: 130px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
+            border: 2px dashed var(--gray-300); border-radius: var(--radius-lg);
+            padding: 20px; text-align: center; cursor: pointer; transition: var(--transition);
+            background: var(--gray-25); position: relative; min-height: 130px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
         }
-        .photo-upload-area:hover {
-            border-color: var(--green-400);
-            background: var(--green-25);
-        }
-        .photo-upload-area.has-photo {
-            border-style: solid;
-            border-color: var(--green-300);
-            background: var(--green-25);
-            padding: 8px;
-        }
-        .photo-upload-area .upload-icon {
-            font-size: 2.5rem;
-            color: var(--gray-400);
-        }
-        .photo-upload-area.has-photo .upload-icon {
-            display: none;
-        }
-        .photo-upload-area .upload-text {
-            font-size: 0.85rem;
-            color: var(--gray-500);
-            font-weight: 500;
-        }
-        .photo-upload-area.has-photo .upload-text {
-            display: none;
-        }
-        .photo-upload-area img {
-            max-width: 100%;
-            max-height: 220px;
-            border-radius: var(--radius);
-            object-fit: contain;
-        }
-        .photo-upload-area input[type="file"] {
-            position: absolute;
-            inset: 0;
-            opacity: 0;
-            cursor: pointer;
-        }
-        .btn-remove-photo {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: rgba(0,0,0,0.6);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 28px;
-            height: 28px;
-            font-size: 0.9rem;
-            cursor: pointer;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 5;
-            transition: var(--transition);
-            line-height: 1;
-        }
-        .photo-upload-area.has-photo .btn-remove-photo {
-            display: flex;
-        }
-        .btn-remove-photo:hover {
-            background: rgba(239, 68, 68, 0.8);
-        }
+        .photo-upload-area:hover { border-color: var(--green-400); background: var(--green-25); }
+        .photo-upload-area.has-photo { border-style: solid; border-color: var(--green-300); background: var(--green-25); padding: 8px; }
+        .photo-upload-area .upload-icon { font-size: 2.5rem; color: var(--gray-400); }
+        .photo-upload-area.has-photo .upload-icon { display: none; }
+        .photo-upload-area .upload-text { font-size: 0.85rem; color: var(--gray-500); font-weight: 500; }
+        .photo-upload-area.has-photo .upload-text { display: none; }
+        .photo-upload-area img { max-width: 100%; max-height: 220px; border-radius: var(--radius); object-fit: contain; }
+        .photo-upload-area input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
         .btn-save {
-            padding: 11px 28px;
-            border-radius: 50px;
-            border: none;
-            background: var(--green-700);
-            color: white;
-            cursor: pointer;
-            font-weight: 700;
-            font-size: 0.9rem;
-            transition: var(--transition);
-            letter-spacing: 0.01em;
+            padding: 11px 28px; border-radius: 50px; border: none;
+            background: var(--green-700); color: white; cursor: pointer;
+            font-weight: 700; font-size: 0.9rem; transition: var(--transition);
             box-shadow: var(--shadow);
         }
-        .btn-save:hover {
-            background: var(--green-600);
-            box-shadow: var(--shadow-md);
-        }
+        .btn-save:hover { background: var(--green-600); box-shadow: var(--shadow-md); }
         .btn-cancel {
-            padding: 11px 22px;
-            border-radius: 50px;
-            border: 2px solid var(--gray-200);
-            background: white;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 0.9rem;
-            transition: var(--transition);
-            color: var(--gray-600);
+            padding: 11px 22px; border-radius: 50px; border: 2px solid var(--gray-200);
+            background: white; cursor: pointer; font-weight: 600; font-size: 0.9rem;
+            transition: var(--transition); color: var(--gray-600);
         }
-        .btn-cancel:hover {
-            background: var(--gray-50);
-            border-color: var(--gray-300);
-        }
+        .btn-cancel:hover { background: var(--gray-50); border-color: var(--gray-300); }
         .btn-danger {
-            padding: 10px 22px;
-            border-radius: 50px;
-            border: none;
-            background: var(--red-500);
-            color: white;
-            cursor: pointer;
-            font-weight: 700;
-            font-size: 0.88rem;
-            transition: var(--transition);
+            padding: 10px 22px; border-radius: 50px; border: none;
+            background: var(--red-500); color: white; cursor: pointer;
+            font-weight: 700; font-size: 0.88rem; transition: var(--transition);
         }
-        .btn-danger:hover {
-            background: #dc2626;
-        }
+        .btn-danger:hover { background: #dc2626; }
 
-        /* ============ PHOTO MODAL ============ */
         .photo-modal-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.88);
-            z-index: 2000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 30px;
-            cursor: pointer;
-            animation: fadeIn 0.2s ease;
+            position: fixed; inset: 0; background: rgba(0, 0, 0, 0.88);
+            z-index: 2000; display: flex; align-items: center; justify-content: center;
+            padding: 30px; cursor: pointer; animation: fadeIn 0.2s ease;
         }
         .photo-modal-overlay img {
-            max-width: 92vw;
-            max-height: 90vh;
-            border-radius: var(--radius-lg);
-            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
-            object-fit: contain;
-            animation: zoomIn 0.3s cubic-bezier(0.22, 0.61, 0.36, 1);
-            cursor: default;
+            max-width: 92vw; max-height: 90vh; border-radius: var(--radius-lg);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5); object-fit: contain;
+            animation: zoomIn 0.3s cubic-bezier(0.22, 0.61, 0.36, 1); cursor: default;
         }
-        @keyframes zoomIn {
-            from {
-                opacity: 0;
-                transform: scale(0.85);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
+        @keyframes zoomIn { from { opacity: 0; transform: scale(0.85); } to { opacity: 1; transform: scale(1); } }
         .photo-modal-close {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.15);
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            color: white;
-            font-size: 1.3rem;
-            cursor: pointer;
-            z-index: 2001;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: var(--transition);
-            backdrop-filter: blur(6px);
+            position: fixed; top: 20px; right: 20px; width: 44px; height: 44px;
+            border-radius: 50%; background: rgba(255, 255, 255, 0.15);
+            border: 2px solid rgba(255, 255, 255, 0.3); color: white;
+            font-size: 1.3rem; cursor: pointer; z-index: 2001;
+            display: flex; align-items: center; justify-content: center;
+            transition: var(--transition); backdrop-filter: blur(6px);
         }
-        .photo-modal-close:hover {
-            background: rgba(255, 255, 255, 0.25);
-            border-color: rgba(255, 255, 255, 0.5);
-        }
+        .photo-modal-close:hover { background: rgba(255, 255, 255, 0.25); }
 
-        /* ============ TOAST ============ */
-        .toast-container {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 3000;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            pointer-events: none;
-        }
+        .toast-container { position: fixed; top: 20px; right: 20px; z-index: 3000; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
         .toast {
-            padding: 13px 20px;
-            border-radius: var(--radius);
-            color: white;
-            font-weight: 600;
-            font-size: 0.85rem;
-            box-shadow: var(--shadow-lg);
-            animation: slideInRight 0.35s cubic-bezier(0.22, 0.61, 0.36, 1),
-                fadeOut 0.3s ease 2.5s forwards;
-            pointer-events: auto;
-            letter-spacing: 0.01em;
-            max-width: 380px;
+            padding: 13px 20px; border-radius: var(--radius); color: white;
+            font-weight: 600; font-size: 0.85rem; box-shadow: var(--shadow-lg);
+            animation: slideInRight 0.35s cubic-bezier(0.22, 0.61, 0.36, 1), fadeOut 0.3s ease 2.5s forwards;
+            pointer-events: auto; letter-spacing: 0.01em; max-width: 380px;
         }
-        .toast-success {
-            background: var(--green-700);
-        }
-        .toast-warning {
-            background: var(--amber-500);
-            color: #1a1a1a;
-        }
-        .toast-error {
-            background: var(--red-500);
-        }
-        .toast-info {
-            background: var(--blue-500);
-        }
-        @keyframes slideInRight {
-            from {
-                opacity: 0;
-                transform: translateX(100px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-        @keyframes fadeOut {
-            to {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-        }
+        .toast-success { background: var(--green-700); }
+        .toast-warning { background: var(--amber-500); color: #1a1a1a; }
+        .toast-error { background: var(--red-500); }
+        .toast-info { background: var(--blue-500); }
+        @keyframes slideInRight { from { opacity: 0; transform: translateX(100px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes fadeOut { to { opacity: 0; transform: translateY(-10px); } }
 
-        /* ============ RESPONSIVE ============ */
         @media (max-width: 768px) {
-            .header {
-                padding: 0 14px;
-                height: auto;
-                flex-wrap: wrap;
-                padding-top: 10px;
-                padding-bottom: 10px;
-                gap: 8px;
-            }
-            .header h1 {
-                font-size: 1rem;
-            }
-            .header-stats {
-                gap: 6px;
-            }
-            .stat-pill {
-                font-size: 0.7rem;
-                padding: 5px 10px;
-            }
-            .cards-grid {
-                grid-template-columns: 1fr;
-                gap: 12px;
-            }
-            .toolbar {
-                gap: 8px;
-            }
-            .btn-add {
-                width: 100%;
-                justify-content: center;
-            }
-            .search-box {
-                max-width: 100%;
-                width: 100%;
-            }
-            .filter-btns {
-                width: 100%;
-                justify-content: flex-start;
-            }
-            .card-photo-wrapper {
-                height: 180px;
-            }
-            .modal-dialog {
-                max-width: 95vw;
-                margin: 0 5px;
-                border-radius: var(--radius-lg);
-            }
+            .header { padding: 0 14px; height: auto; flex-wrap: wrap; padding-top: 10px; padding-bottom: 10px; gap: 8px; }
+            .header h1 { font-size: 1rem; }
+            .cards-grid { grid-template-columns: 1fr; gap: 12px; }
+            .btn-add { width: 100%; justify-content: center; }
         }
-        @media (max-width: 400px) {
-            .card-actions {
-                gap: 4px;
-            }
-            .btn-action {
-                padding: 6px 10px;
-                font-size: 0.7rem;
-                gap: 3px;
-            }
-            .header h1 {
-                font-size: 0.85rem;
-            }
-            .header-icon {
-                width: 32px;
-                height: 32px;
-                font-size: 16px;
-            }
-        }
-
-        /* Scrollbar estilizada */
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: var(--gray-300);
-            border-radius: 10px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--gray-400);
-        }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--gray-300); border-radius: 10px; }
     </style>
 </head>
 <body>
-
-    <!-- ==================== HEADER ==================== -->
     <header class="header">
         <div class="header-logo">
             <div class="header-icon">📦</div>
-            <h1>
-                Estoque de Não Conformidade
-                <span>(DIMEP)</span>
-            </h1>
+            <h1>Estoque de Não Conformidade <span>(DIMEP)</span></h1>
         </div>
-        <div class="header-stats" id="headerStats">
+        <div class="header-stats">
             <div class="stat-pill"><span class="dot dot-pendente"></span> Pendentes: <strong id="countPendente">0</strong></div>
             <div class="stat-pill"><span class="dot dot-refugo"></span> Refugo: <strong id="countRefugo">0</strong></div>
             <div class="stat-pill"><span class="dot dot-retrabalho"></span> Retrabalho: <strong id="countRetrabalho">0</strong></div>
@@ -993,273 +575,153 @@
         </div>
     </header>
 
-    <!-- ==================== MAIN ==================== -->
     <div class="main-container">
-        <!-- Toolbar -->
         <div class="toolbar">
             <div class="toolbar-left">
                 <div class="search-box">
                     <span class="search-icon">🔍</span>
-                    <input type="text" id="searchInput" placeholder="Buscar por produto, armazém ou endereço..." autocomplete="off">
+                    <input type="text" id="searchInput" placeholder="Buscar por produto, armazém ou endereço...">
                 </div>
-                <div class="filter-btns" id="filterBtns">
+                <div class="filter-btns">
                     <button class="filter-btn active" data-filter="todos">📋 Todos</button>
                     <button class="filter-btn" data-filter="pendente">⚠️ Pendentes</button>
                     <button class="filter-btn" data-filter="refugo">🗑️ Refugo</button>
                     <button class="filter-btn" data-filter="retrabalho">🔧 Retrabalho</button>
                 </div>
             </div>
-            <button class="btn-add" id="btnAddItem">
-                <span class="plus-icon">+</span> Adicionar Item
-            </button>
+            <button class="btn-add" id="btnAddItem"><span class="plus-icon">+</span> Adicionar Item</button>
         </div>
-
-        <!-- Cards Grid -->
-        <div class="cards-grid" id="cardsGrid">
-            <!-- Renderizado dinamicamente -->
-        </div>
+        <div class="cards-grid" id="cardsGrid"></div>
     </div>
 
-    <!-- ==================== MODAL: FORMULÁRIO (Adicionar/Editar) ==================== -->
+    <!-- Modal Formulário -->
     <div class="modal-overlay" id="modalFormOverlay" style="display:none;">
-        <div class="modal-dialog" id="modalFormDialog">
+        <div class="modal-dialog">
             <div class="modal-header">
                 <h2 id="modalFormTitle">Adicionar Item</h2>
                 <button class="modal-close" id="btnCloseFormModal">✕</button>
             </div>
             <div class="modal-body">
-                <form id="itemForm" autocomplete="off">
-                    <input type="hidden" id="itemId" value="">
-                    <input type="hidden" id="existingPhoto" value="">
-                    <div class="form-group">
-                        <label for="produto">🏷️ Produto *</label>
-                        <input type="text" id="produto" placeholder="Nome do produto / material" required maxlength="120">
-                    </div>
+                <form id="itemForm">
+                    <input type="hidden" id="itemId">
+                    <input type="hidden" id="existingPhoto">
+                    <div class="form-group"><label>🏷️ Produto *</label><input type="text" id="produto" required></div>
                     <div class="form-row">
-                        <div class="form-group">
-                            <label for="armazem">🏭 Armazém *</label>
-                            <input type="text" id="armazem" placeholder="Ex: Depósito A" required maxlength="80">
-                        </div>
-                        <div class="form-group">
-                            <label for="endereco">📍 Endereço *</label>
-                            <input type="text" id="endereco" placeholder="Ex: Rua 3, Prateleira B" required maxlength="80">
-                        </div>
+                        <div class="form-group"><label>🏭 Armazém *</label><input type="text" id="armazem" required></div>
+                        <div class="form-group"><label>📍 Endereço *</label><input type="text" id="endereco" required></div>
                     </div>
-                    <div class="form-group">
-                        <label for="quantidade">📊 Quantidade *</label>
-                        <input type="number" id="quantidade" placeholder="Quantidade de itens" required min="1" max="99999" value="1">
-                    </div>
+                    <div class="form-group"><label>📊 Quantidade *</label><input type="number" id="quantidade" min="1" value="1" required></div>
                     <div class="form-group">
                         <label>📸 Foto da Localidade</label>
                         <div class="photo-upload-area" id="photoUploadArea">
                             <span class="upload-icon">📷</span>
-                            <span class="upload-text">Clique para selecionar uma foto<br><small style="opacity:0.6;">(opcional, formatos JPG/PNG)</small></span>
-                            <img id="photoPreview" src="" alt="Preview" style="display:none;">
-                            <button type="button" class="btn-remove-photo" id="btnRemovePhoto" title="Remover foto">🗑️</button>
-                            <input type="file" id="photoInput" accept="image/jpeg,image/png,image/webp,image/gif">
+                            <span class="upload-text">Clique para selecionar uma foto<br><small>(opcional)</small></span>
+                            <img id="photoPreview" src="" style="display:none;">
+                            <input type="file" id="photoInput" accept="image/*">
                         </div>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn-cancel" id="btnCancelForm">Cancelar</button>
-                <button type="button" class="btn-save" id="btnSaveItem">💾 Salvar Item</button>
+                <button class="btn-cancel" id="btnCancelForm">Cancelar</button>
+                <button class="btn-save" id="btnSaveItem">💾 Salvar Item</button>
             </div>
         </div>
     </div>
 
-    <!-- ==================== MODAL: FOTO AMPLIADA ==================== -->
+    <!-- Modal Foto ampliada -->
     <div class="photo-modal-overlay" id="photoModalOverlay" style="display:none;">
         <button class="photo-modal-close" id="btnClosePhotoModal">✕</button>
-        <img src="" alt="Foto ampliada" id="photoModalImg">
+        <img src="" id="photoModalImg">
     </div>
 
-    <!-- ==================== MODAL: CONFIRMAÇÃO DE EXCLUSÃO ==================== -->
+    <!-- Modal Confirmar exclusão -->
     <div class="modal-overlay" id="modalConfirmOverlay" style="display:none;">
-        <div class="modal-dialog" style="max-width:420px; text-align:center;">
-            <div class="modal-header" style="border-bottom:none; justify-content:center;">
-                <h2 style="font-size:1.1rem;">🗑️ Confirmar Exclusão</h2>
+        <div class="modal-dialog" style="max-width:420px;text-align:center;">
+            <div class="modal-header" style="border-bottom:none;justify-content:center;"><h2>🗑️ Confirmar Exclusão</h2></div>
+            <div class="modal-body">
+                <p>Tem certeza que deseja excluir este item?</p>
+                <p style="color:var(--red-500);font-weight:600;" id="confirmItemName"></p>
             </div>
-            <div class="modal-body" style="padding-bottom:8px;">
-                <p style="color:var(--gray-600);font-size:0.9rem;">Tem certeza que deseja excluir este item?</p>
-                <p style="color:var(--red-500);font-weight:600;font-size:0.85rem;" id="confirmItemName"></p>
-                <p style="color:var(--gray-400);font-size:0.75rem;">Esta ação não pode ser desfeita.</p>
-            </div>
-            <div class="modal-footer" style="border-top:none; justify-content:center; gap:12px;">
+            <div class="modal-footer" style="border-top:none;justify-content:center;">
                 <button class="btn-cancel" id="btnCancelConfirm">Cancelar</button>
-                <button class="btn-danger" id="btnConfirmDelete">🗑️ Excluir Permanentemente</button>
+                <button class="btn-danger" id="btnConfirmDelete">Excluir</button>
             </div>
         </div>
     </div>
 
-    <!-- ==================== TOAST CONTAINER ==================== -->
     <div class="toast-container" id="toastContainer"></div>
 
     <script>
         (function() {
-            // ============ CONFIGURAÇÃO FIREBASE ============
-            const firebaseConfig = {
-                apiKey: "AIzaSyC_LtQbuGX8-de2ouMu8DHX-PicWyepAic",
-                authDomain: "estoquedimep.firebaseapp.com",
-                projectId: "estoquedimep",
-                storageBucket: "estoquedimep.firebasestorage.app",
-                messagingSenderId: "464649699304",
-                appId: "1:464649699304:web:e4472b4917c8471dc4ee5d"
-            };
-
-            firebase.initializeApp(firebaseConfig);
-            const db = firebase.firestore();
-            const storage = firebase.storage();
-            const itensCollection = db.collection('itens');
-
-            // ============ CONSTANTES ============
-            const MAX_IMAGE_WIDTH = 600;
-            const MAX_IMAGE_HEIGHT = 600;
-            const IMAGE_QUALITY = 0.6;
-
-            // ============ ESTADO ============
-            let items = [];
+            const STORAGE_KEY = 'estoque_dimep_data';
+            let items = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
             let currentFilter = 'todos';
             let searchTerm = '';
             let itemIdToDelete = null;
-            let originalPhotoUrl = null; // guarda a URL da foto antes da edição
 
-            // ============ ELEMENTOS DOM ============
-            const cardsGrid = document.getElementById('cardsGrid');
-            const searchInput = document.getElementById('searchInput');
-            const filterBtns = document.getElementById('filterBtns');
-            const btnAddItem = document.getElementById('btnAddItem');
-            const modalFormOverlay = document.getElementById('modalFormOverlay');
-            const modalFormTitle = document.getElementById('modalFormTitle');
-            const itemForm = document.getElementById('itemForm');
-            const itemIdInput = document.getElementById('itemId');
-            const existingPhotoInput = document.getElementById('existingPhoto');
-            const produtoInput = document.getElementById('produto');
-            const armazemInput = document.getElementById('armazem');
-            const enderecoInput = document.getElementById('endereco');
-            const quantidadeInput = document.getElementById('quantidade');
-            const photoInput = document.getElementById('photoInput');
-            const photoPreview = document.getElementById('photoPreview');
-            const photoUploadArea = document.getElementById('photoUploadArea');
-            const btnRemovePhoto = document.getElementById('btnRemovePhoto');
-            const btnSaveItem = document.getElementById('btnSaveItem');
-            const btnCancelForm = document.getElementById('btnCancelForm');
-            const btnCloseFormModal = document.getElementById('btnCloseFormModal');
-            const photoModalOverlay = document.getElementById('photoModalOverlay');
-            const photoModalImg = document.getElementById('photoModalImg');
-            const btnClosePhotoModal = document.getElementById('btnClosePhotoModal');
-            const modalConfirmOverlay = document.getElementById('modalConfirmOverlay');
-            const confirmItemName = document.getElementById('confirmItemName');
-            const btnCancelConfirm = document.getElementById('btnCancelConfirm');
-            const btnConfirmDelete = document.getElementById('btnConfirmDelete');
-            const toastContainer = document.getElementById('toastContainer');
-            const countPendente = document.getElementById('countPendente');
-            const countRefugo = document.getElementById('countRefugo');
-            const countRetrabalho = document.getElementById('countRetrabalho');
-            const countTotal = document.getElementById('countTotal');
+            const $ = id => document.getElementById(id);
+            const cardsGrid = $('cardsGrid');
+            const searchInput = $('searchInput');
+            const modalFormOverlay = $('modalFormOverlay');
+            const photoUploadArea = $('photoUploadArea');
+            const photoPreview = $('photoPreview');
+            const photoInput = $('photoInput');
+            const existingPhoto = $('existingPhoto');
+            const itemIdInput = $('itemId');
+            const produtoInput = $('produto');
+            const armazemInput = $('armazem');
+            const enderecoInput = $('endereco');
+            const quantidadeInput = $('quantidade');
+            const photoModalOverlay = $('photoModalOverlay');
+            const photoModalImg = $('photoModalImg');
+            const modalConfirmOverlay = $('modalConfirmOverlay');
+            const confirmItemName = $('confirmItemName');
+            const toastContainer = $('toastContainer');
 
-            // ============ SINCRONIZAÇÃO EM TEMPO REAL ============
-            function loadItemsRealtime() {
-                itensCollection.orderBy('dataCriacao', 'desc').onSnapshot((snapshot) => {
-                    items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                    renderCards();
-                }, (error) => {
-                    console.error("Erro ao carregar itens:", error);
-                    showToast("Erro ao sincronizar dados com o servidor.", "error");
-                });
+            function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(items)); }
+            function showToast(msg, type='success') {
+                const t = document.createElement('div');
+                t.className = `toast toast-${type}`;
+                t.textContent = msg;
+                toastContainer.appendChild(t);
+                setTimeout(() => t.remove(), 3000);
             }
 
-            // ============ COMPRESSÃO DE IMAGEM ============
             function compressImage(file) {
-                return new Promise((resolve, reject) => {
-                    if (!file || !file.type.startsWith('image/')) {
-                        resolve(null);
-                        return;
-                    }
+                return new Promise(resolve => {
+                    if (!file) return resolve('');
                     const reader = new FileReader();
-                    reader.onload = function(e) {
+                    reader.onload = e => {
                         const img = new Image();
-                        img.onload = function() {
-                            let w = img.width;
-                            let h = img.height;
-                            if (w <= MAX_IMAGE_WIDTH && h <= MAX_IMAGE_HEIGHT) {
-                                resolve(e.target.result);
-                                return;
-                            }
-                            const ratio = Math.min(MAX_IMAGE_WIDTH / w, MAX_IMAGE_HEIGHT / h);
-                            w = Math.round(w * ratio);
-                            h = Math.round(h * ratio);
+                        img.onload = () => {
+                            const maxW = 600, maxH = 600;
+                            let w = img.width, h = img.height;
+                            if (w <= maxW && h <= maxH) return resolve(e.target.result);
+                            const ratio = Math.min(maxW/w, maxH/h);
                             const canvas = document.createElement('canvas');
-                            canvas.width = w;
-                            canvas.height = h;
-                            const ctx = canvas.getContext('2d');
-                            ctx.drawImage(img, 0, 0, w, h);
-                            resolve(canvas.toDataURL('image/jpeg', IMAGE_QUALITY));
+                            canvas.width = w * ratio;
+                            canvas.height = h * ratio;
+                            canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+                            resolve(canvas.toDataURL('image/jpeg', 0.6));
                         };
-                        img.onerror = () => reject(new Error('Erro ao carregar imagem'));
                         img.src = e.target.result;
                     };
-                    reader.onerror = () => reject(new Error('Erro ao ler arquivo'));
                     reader.readAsDataURL(file);
                 });
             }
 
-            function dataURLtoBlob(dataurl) {
-                const arr = dataurl.split(',');
-                const mime = arr[0].match(/:(.*?);/)[1];
-                const bstr = atob(arr[1]);
-                let n = bstr.length;
-                const u8arr = new Uint8Array(n);
-                while (n--) {
-                    u8arr[n] = bstr.charCodeAt(n);
-                }
-                return new Blob([u8arr], { type: mime });
-            }
-
-            // ============ UPLOAD / DELETE FOTO NO STORAGE ============
-            async function uploadPhoto(file) {
-                const compressedDataUrl = await compressImage(file);
-                if (!compressedDataUrl) return '';
-                const blob = dataURLtoBlob(compressedDataUrl);
-                const ref = storage.ref(`fotos/${Date.now()}_${Math.random().toString(36).substr(2,6)}.jpg`);
-                await ref.put(blob);
-                return await ref.getDownloadURL();
-            }
-
-            async function deletePhotoByUrl(url) {
-                if (!url) return;
-                try {
-                    const ref = storage.refFromURL(url);
-                    await ref.delete();
-                } catch (e) {
-                    console.warn('Não foi possível deletar foto do storage:', e);
-                }
-            }
-
-            // ============ TOAST ============
-            function showToast(message, type = 'success') {
-                const toast = document.createElement('div');
-                toast.className = `toast toast-${type}`;
-                toast.textContent = message;
-                toastContainer.appendChild(toast);
-                setTimeout(() => {
-                    if (toast.parentNode) toast.remove();
-                }, 3000);
-            }
-
-            // ============ MODAIS ============
-            function openFormModal(itemId = null) {
-                if (itemId) {
-                    modalFormTitle.textContent = '✏️ Editar Item';
-                    const item = items.find(i => i.id === itemId);
+            function openFormModal(id = null) {
+                if (id) {
+                    const item = items.find(i => i.id === id);
                     if (!item) return;
+                    $('modalFormTitle').textContent = '✏️ Editar Item';
                     itemIdInput.value = item.id;
                     produtoInput.value = item.produto;
                     armazemInput.value = item.armazem;
                     enderecoInput.value = item.endereco;
                     quantidadeInput.value = item.quantidade;
-                    existingPhotoInput.value = item.foto || '';
-                    originalPhotoUrl = item.foto || null;
+                    existingPhoto.value = item.foto || '';
                     if (item.foto) {
                         photoPreview.src = item.foto;
                         photoPreview.style.display = 'block';
@@ -1270,444 +732,210 @@
                         photoUploadArea.classList.remove('has-photo');
                     }
                 } else {
-                    modalFormTitle.textContent = '📦 Adicionar Novo Item';
+                    $('modalFormTitle').textContent = '📦 Adicionar Novo Item';
                     itemIdInput.value = '';
                     produtoInput.value = '';
                     armazemInput.value = '';
                     enderecoInput.value = '';
                     quantidadeInput.value = '1';
-                    existingPhotoInput.value = '';
-                    originalPhotoUrl = null;
+                    existingPhoto.value = '';
                     photoPreview.src = '';
                     photoPreview.style.display = 'none';
                     photoUploadArea.classList.remove('has-photo');
                 }
                 photoInput.value = '';
                 modalFormOverlay.style.display = 'flex';
-                setTimeout(() => produtoInput.focus(), 150);
+                produtoInput.focus();
             }
 
             function closeFormModal() {
                 modalFormOverlay.style.display = 'none';
-                itemForm.reset();
-                itemIdInput.value = '';
-                existingPhotoInput.value = '';
-                originalPhotoUrl = null;
                 photoPreview.src = '';
                 photoPreview.style.display = 'none';
                 photoUploadArea.classList.remove('has-photo');
-                photoInput.value = '';
             }
 
-            function openPhotoModal(imageSrc) {
-                if (!imageSrc) return;
-                photoModalImg.src = imageSrc;
-                photoModalOverlay.style.display = 'flex';
-                document.body.style.overflow = 'hidden';
-            }
-
-            function closePhotoModal() {
-                photoModalOverlay.style.display = 'none';
-                photoModalImg.src = '';
-                document.body.style.overflow = '';
-            }
-
-            function openConfirmModal(itemId) {
-                itemIdToDelete = itemId;
-                const item = items.find(i => i.id === itemId);
-                if (item) {
-                    confirmItemName.textContent = `"${item.produto}" - ${item.armazem} / ${item.endereco}`;
+            async function saveItem() {
+                const produto = produtoInput.value.trim();
+                const armazem = armazemInput.value.trim();
+                const endereco = enderecoInput.value.trim();
+                const quantidade = parseInt(quantidadeInput.value) || 1;
+                if (!produto || !armazem || !endereco) {
+                    return showToast('Preencha todos os campos obrigatórios.', 'warning');
                 }
-                modalConfirmOverlay.style.display = 'flex';
-            }
+                const editId = itemIdInput.value;
+                const fotoFile = photoInput.files[0];
+                let foto = existingPhoto.value;
+                if (fotoFile) {
+                    foto = await compressImage(fotoFile);
+                } else if (!editId && !foto) {
+                    foto = '';
+                }
 
-            function closeConfirmModal() {
-                modalConfirmOverlay.style.display = 'none';
-                itemIdToDelete = null;
-            }
-
-            // ============ CRUD COM FIREBASE ============
-            async function addItem(data, photoFile) {
-                const docData = {
-                    produto: data.produto.trim(),
-                    armazem: data.armazem.trim(),
-                    endereco: data.endereco.trim(),
-                    quantidade: parseInt(data.quantidade, 10) || 1,
-                    foto: '',
-                    status: 'pendente',
-                    dataCriacao: firebase.firestore.Timestamp.now(),
-                };
-                try {
-                    const docRef = await itensCollection.add(docData);
-                    if (photoFile) {
-                        const fotoURL = await uploadPhoto(photoFile);
-                        if (fotoURL) {
-                            await docRef.update({ foto: fotoURL });
-                        }
+                if (editId) {
+                    const index = items.findIndex(i => i.id === editId);
+                    if (index !== -1) {
+                        items[index].produto = produto;
+                        items[index].armazem = armazem;
+                        items[index].endereco = endereco;
+                        items[index].quantidade = quantidade;
+                        items[index].foto = foto;
                     }
-                    showToast('✅ Item adicionado com sucesso!', 'success');
-                } catch (e) {
-                    console.error(e);
-                    showToast('Erro ao adicionar item. Tente novamente.', 'error');
+                } else {
+                    items.unshift({
+                        id: Date.now().toString(36) + Math.random().toString(36).substr(2),
+                        produto, armazem, endereco, quantidade, foto,
+                        status: 'pendente',
+                        dataCriacao: new Date().toISOString()
+                    });
                 }
+                save();
+                renderAll();
+                closeFormModal();
+                showToast('✅ Item salvo com sucesso!');
             }
 
-            async function updateItem(id, data, photoFile) {
-                const docRef = itensCollection.doc(id);
-                const updateData = {
-                    produto: data.produto.trim(),
-                    armazem: data.armazem.trim(),
-                    endereco: data.endereco.trim(),
-                    quantidade: parseInt(data.quantidade, 10) || 1,
-                };
-                try {
-                    if (photoFile) {
-                        // Nova foto enviada
-                        const newUrl = await uploadPhoto(photoFile);
-                        updateData.foto = newUrl || '';
-                        if (originalPhotoUrl) {
-                            await deletePhotoByUrl(originalPhotoUrl);
-                        }
-                    } else if (data.existingPhoto === '' && originalPhotoUrl) {
-                        // Foto removida
-                        updateData.foto = '';
-                        await deletePhotoByUrl(originalPhotoUrl);
-                    } else if (data.existingPhoto) {
-                        // Manteve a foto existente
-                        updateData.foto = data.existingPhoto;
-                    } else {
-                        updateData.foto = '';
-                    }
-                    await docRef.update(updateData);
-                    showToast('✅ Item atualizado com sucesso!', 'success');
-                } catch (e) {
-                    console.error(e);
-                    showToast('Erro ao atualizar item.', 'error');
-                }
+            function deleteItem(id) {
+                items = items.filter(i => i.id !== id);
+                save();
+                renderAll();
+                showToast('🗑️ Item excluído.');
             }
 
-            async function deleteItem(id) {
+            function changeStatus(id, newStatus) {
                 const item = items.find(i => i.id === id);
-                if (item && item.foto) {
-                    await deletePhotoByUrl(item.foto).catch(() => {});
+                if (item) {
+                    item.status = newStatus;
+                    save();
+                    renderAll();
+                    showToast(`Status alterado para "${newStatus}".`);
                 }
-                try {
-                    await itensCollection.doc(id).delete();
-                    showToast('🗑️ Item excluído permanentemente.', 'info');
-                } catch (e) {
-                    console.error(e);
-                    showToast('Erro ao excluir item.', 'error');
-                }
-            }
-
-            async function changeStatus(id, newStatus) {
-                try {
-                    await itensCollection.doc(id).update({ status: newStatus });
-                    const labels = { pendente: 'Pendente', refugo: 'Refugo', retrabalho: 'Retrabalho' };
-                    showToast(`🔄 Status alterado para "${labels[newStatus]}".`, 'info');
-                } catch (e) {
-                    console.error(e);
-                    showToast('Erro ao alterar status.', 'error');
-                }
-            }
-
-            // ============ RENDERIZAÇÃO ============
-            function getFilteredItems() {
-                let filtered = [...items];
-                if (currentFilter !== 'todos') {
-                    filtered = filtered.filter(i => i.status === currentFilter);
-                }
-                if (searchTerm.trim()) {
-                    const term = searchTerm.trim().toLowerCase();
-                    filtered = filtered.filter(i =>
-                        i.produto.toLowerCase().includes(term) ||
-                        i.armazem.toLowerCase().includes(term) ||
-                        i.endereco.toLowerCase().includes(term)
-                    );
-                }
-                return filtered;
-            }
-
-            function updateHeaderStats() {
-                const total = items.length;
-                const pendentes = items.filter(i => i.status === 'pendente').length;
-                const refugos = items.filter(i => i.status === 'refugo').length;
-                const retrabalhos = items.filter(i => i.status === 'retrabalho').length;
-                countPendente.textContent = pendentes;
-                countRefugo.textContent = refugos;
-                countRetrabalho.textContent = retrabalhos;
-                countTotal.textContent = total;
-            }
-
-            function formatDate(timestamp) {
-                if (!timestamp) return '';
-                const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-                if (isNaN(date.getTime())) return '';
-                const day = String(date.getDate()).padStart(2, '0');
-                const month = String(date.getMonth() + 1).padStart(2, '0');
-                const year = date.getFullYear();
-                const hours = String(date.getHours()).padStart(2, '0');
-                const minutes = String(date.getMinutes()).padStart(2, '0');
-                return `${day}/${month}/${year} ${hours}:${minutes}`;
-            }
-
-            function statusBadgeClass(status) {
-                const map = { pendente: 'badge-pendente', refugo: 'badge-refugo', retrabalho: 'badge-retrabalho' };
-                return map[status] || 'badge-pendente';
-            }
-
-            function statusLabel(status) {
-                const map = { pendente: 'Pendente', refugo: 'Refugo', retrabalho: 'Retrabalho' };
-                return map[status] || 'Pendente';
             }
 
             function renderCards() {
-                const filtered = getFilteredItems();
+                let filtered = items;
+                if (currentFilter !== 'todos') filtered = filtered.filter(i => i.status === currentFilter);
+                if (searchTerm) {
+                    const term = searchTerm.toLowerCase();
+                    filtered = filtered.filter(i => i.produto.toLowerCase().includes(term) || i.armazem.toLowerCase().includes(term) || i.endereco.toLowerCase().includes(term));
+                }
+
                 if (filtered.length === 0) {
-                    cardsGrid.innerHTML = `
-                        <div class="empty-state">
-                            <div class="empty-icon">📭</div>
-                            <h3>Nenhum item encontrado</h3>
-                            <p>${items.length === 0 ? 'Clique em "Adicionar Item" para começar.' : 'Tente ajustar os filtros ou a busca.'}</p>
-                        </div>`;
+                    cardsGrid.innerHTML = `<div class="empty-state"><div class="empty-icon">📭</div><h3>Nenhum item encontrado</h3></div>`;
                 } else {
                     cardsGrid.innerHTML = filtered.map(item => `
-                        <div class="card status-${item.status}" data-id="${item.id}">
-                            <div class="card-photo-wrapper" data-action="view-photo" data-photo="${item.foto ? '1' : '0'}" data-id="${item.id}">
-                                ${item.foto
-                                    ? `<img src="${item.foto}" alt="Foto de ${escapeHTML(item.produto)}" loading="lazy">
-                                       <div class="photo-overlay">🔍</div>`
-                                    : `<div class="card-photo-placeholder">📦</div>`
-                                }
-                                <span class="card-badge ${statusBadgeClass(item.status)}">${statusLabel(item.status)}</span>
+                        <div class="card status-${item.status}">
+                            <div class="card-photo-wrapper" data-action="photo" data-id="${item.id}">
+                                ${item.foto ? `<img src="${item.foto}" alt="Foto"><div class="photo-overlay">🔍</div>` : '<div class="card-photo-placeholder">📦</div>'}
+                                <span class="card-badge badge-${item.status}">${item.status}</span>
                             </div>
                             <div class="card-body">
-                                <h3 title="${escapeHTML(item.produto)}">${escapeHTML(truncate(item.produto, 50))}</h3>
+                                <h3>${item.produto}</h3>
                                 <div class="card-info-row">
-                                    <span class="info-item"><span class="info-icon">🏭</span> ${escapeHTML(truncate(item.armazem, 30))}</span>
-                                    <span class="info-item"><span class="info-icon">📍</span> ${escapeHTML(truncate(item.endereco, 30))}</span>
+                                    <span>🏭 ${item.armazem}</span>
+                                    <span>📍 ${item.endereco}</span>
                                 </div>
                                 <span class="card-quantity">📊 Qtd: ${item.quantidade}</span>
-                                <span class="card-date">📅 ${formatDate(item.dataCriacao)}</span>
+                                <span class="card-date">📅 ${new Date(item.dataCriacao).toLocaleString()}</span>
                             </div>
                             <div class="card-actions">
                                 <button class="btn-action btn-edit" data-action="edit" data-id="${item.id}">✏️ Editar</button>
-                                ${item.status !== 'refugo' ? `<button class="btn-action btn-refugo" data-action="refugo" data-id="${item.id}">🗑️ Refugo</button>` : ''}
-                                ${item.status !== 'retrabalho' ? `<button class="btn-action btn-retrabalho" data-action="retrabalho" data-id="${item.id}">🔧 Retrabalho</button>` : ''}
-                                ${item.status !== 'pendente' ? `<button class="btn-action btn-edit" data-action="pendente" data-id="${item.id}" style="color:#f59e0b;border-color:#fde68a;background:#fffbeb;">↩️ Reverter</button>` : ''}
+                                ${item.status !== 'refugo' ? '<button class="btn-action btn-refugo" data-action="refugo" data-id="'+item.id+'">🗑️ Refugo</button>' : ''}
+                                ${item.status !== 'retrabalho' ? '<button class="btn-action btn-retrabalho" data-action="retrabalho" data-id="'+item.id+'">🔧 Retrabalho</button>' : ''}
+                                ${item.status !== 'pendente' ? '<button class="btn-action btn-edit" data-action="pendente" data-id="'+item.id+'" style="color:#f59e0b;">↩️ Reverter</button>' : ''}
                                 <button class="btn-action btn-delete" data-action="delete" data-id="${item.id}">❌ Excluir</button>
                             </div>
                         </div>
                     `).join('');
                 }
-                updateHeaderStats();
+
+                $('countPendente').textContent = items.filter(i => i.status === 'pendente').length;
+                $('countRefugo').textContent = items.filter(i => i.status === 'refugo').length;
+                $('countRetrabalho').textContent = items.filter(i => i.status === 'retrabalho').length;
+                $('countTotal').textContent = items.length;
             }
 
-            function escapeHTML(str) {
-                const div = document.createElement('div');
-                div.textContent = str;
-                return div.innerHTML;
-            }
+            function renderAll() { renderCards(); }
 
-            function truncate(str, maxLen) {
-                if (!str) return '';
-                if (str.length <= maxLen) return str;
-                return str.substring(0, maxLen - 3) + '...';
-            }
-
-            // ============ EVENT DELEGATION PARA CARDS ============
-            cardsGrid.addEventListener('click', function(e) {
-                const target = e.target.closest('[data-action]');
-                if (!target) return;
-                const action = target.getAttribute('data-action');
-                const id = target.getAttribute('data-id');
-
-                if (action === 'view-photo') {
-                    const hasPhoto = target.getAttribute('data-photo');
-                    if (hasPhoto === '1') {
-                        const item = items.find(i => i.id === id);
-                        if (item && item.foto) {
-                            openPhotoModal(item.foto);
-                        }
-                    }
-                    return;
+            // Eventos
+            cardsGrid.addEventListener('click', e => {
+                const btn = e.target.closest('[data-action]');
+                if (!btn) return;
+                const action = btn.dataset.action;
+                const id = btn.dataset.id;
+                if (action === 'edit') openFormModal(id);
+                else if (action === 'refugo') changeStatus(id, 'refugo');
+                else if (action === 'retrabalho') changeStatus(id, 'retrabalho');
+                else if (action === 'pendente') changeStatus(id, 'pendente');
+                else if (action === 'delete') {
+                    itemIdToDelete = id;
+                    const item = items.find(i => i.id === id);
+                    if (item) confirmItemName.textContent = `"${item.produto}" - ${item.armazem}`;
+                    modalConfirmOverlay.style.display = 'flex';
                 }
-                if (action === 'edit') {
-                    openFormModal(id);
-                    return;
-                }
-                if (action === 'refugo') {
-                    changeStatus(id, 'refugo');
-                    return;
-                }
-                if (action === 'retrabalho') {
-                    changeStatus(id, 'retrabalho');
-                    return;
-                }
-                if (action === 'pendente') {
-                    changeStatus(id, 'pendente');
-                    return;
-                }
-                if (action === 'delete') {
-                    openConfirmModal(id);
-                    return;
-                }
-            });
-
-            cardsGrid.addEventListener('click', function(e) {
-                const wrapper = e.target.closest('.card-photo-wrapper');
-                if (!wrapper) return;
-                const id = wrapper.getAttribute('data-id');
-                const hasPhoto = wrapper.getAttribute('data-photo');
-                if (hasPhoto === '1' && id) {
+                else if (action === 'photo') {
                     const item = items.find(i => i.id === id);
                     if (item && item.foto) {
-                        openPhotoModal(item.foto);
+                        photoModalImg.src = item.foto;
+                        photoModalOverlay.style.display = 'flex';
                     }
                 }
             });
 
-            // ============ EVENT LISTENERS ============
-            btnAddItem.addEventListener('click', () => openFormModal(null));
-
-            btnCloseFormModal.addEventListener('click', closeFormModal);
-            btnCancelForm.addEventListener('click', closeFormModal);
-            modalFormOverlay.addEventListener('click', function(e) {
-                if (e.target === modalFormOverlay) closeFormModal();
+            $('btnAddItem').addEventListener('click', () => openFormModal());
+            $('btnCloseFormModal').addEventListener('click', closeFormModal);
+            $('btnCancelForm').addEventListener('click', closeFormModal);
+            $('btnSaveItem').addEventListener('click', saveItem);
+            $('btnClosePhotoModal').addEventListener('click', () => photoModalOverlay.style.display = 'none');
+            $('btnCancelConfirm').addEventListener('click', () => modalConfirmOverlay.style.display = 'none');
+            $('btnConfirmDelete').addEventListener('click', () => {
+                if (itemIdToDelete) deleteItem(itemIdToDelete);
+                modalConfirmOverlay.style.display = 'none';
             });
 
-            // Remover foto no modal
-            btnRemovePhoto.addEventListener('click', function(e) {
-                e.stopPropagation();
-                existingPhotoInput.value = '';
-                photoPreview.src = '';
-                photoPreview.style.display = 'none';
-                photoUploadArea.classList.remove('has-photo');
-                photoInput.value = '';
-            });
-
-            btnSaveItem.addEventListener('click', async function() {
-                const produto = produtoInput.value.trim();
-                const armazem = armazemInput.value.trim();
-                const endereco = enderecoInput.value.trim();
-                const quantidade = parseInt(quantidadeInput.value, 10);
-
-                if (!produto) {
-                    showToast('⚠️ O campo "Produto" é obrigatório.', 'warning');
-                    produtoInput.focus();
-                    return;
-                }
-                if (!armazem) {
-                    showToast('⚠️ O campo "Armazém" é obrigatório.', 'warning');
-                    armazemInput.focus();
-                    return;
-                }
-                if (!endereco) {
-                    showToast('⚠️ O campo "Endereço" é obrigatório.', 'warning');
-                    enderecoInput.focus();
-                    return;
-                }
-                if (isNaN(quantidade) || quantidade < 1) {
-                    showToast('⚠️ A quantidade deve ser pelo menos 1.', 'warning');
-                    quantidadeInput.focus();
-                    return;
-                }
-
-                const data = {
-                    produto,
-                    armazem,
-                    endereco,
-                    quantidade,
-                    existingPhoto: existingPhotoInput.value,
-                };
-                const photoFile = photoInput.files[0] || null;
-                const editId = itemIdInput.value;
-
-                if (editId) {
-                    await updateItem(editId, data, photoFile);
-                } else {
-                    await addItem(data, photoFile);
-                }
-                closeFormModal();
-            });
-
-            // Preview da foto no upload
-            photoInput.addEventListener('change', function() {
-                const file = photoInput.files[0];
-                if (file && file.type.startsWith('image/')) {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        photoPreview.src = e.target.result;
-                        photoPreview.style.display = 'block';
-                        photoUploadArea.classList.add('has-photo');
-                        existingPhotoInput.value = ''; // indica que uma nova foto foi selecionada
-                    };
-                    reader.readAsDataURL(file);
-                } else if (!file && existingPhotoInput.value) {
-                    photoPreview.src = existingPhotoInput.value;
-                    photoPreview.style.display = 'block';
-                    photoUploadArea.classList.add('has-photo');
-                } else {
-                    photoPreview.src = '';
-                    photoPreview.style.display = 'none';
-                    photoUploadArea.classList.remove('has-photo');
-                }
-            });
-
-            // Modal de foto ampliada
-            btnClosePhotoModal.addEventListener('click', closePhotoModal);
-            photoModalOverlay.addEventListener('click', function(e) {
-                if (e.target === photoModalOverlay) closePhotoModal();
-            });
-
-            // Modal de confirmação
-            btnCancelConfirm.addEventListener('click', closeConfirmModal);
-            modalConfirmOverlay.addEventListener('click', function(e) {
-                if (e.target === modalConfirmOverlay) closeConfirmModal();
-            });
-            btnConfirmDelete.addEventListener('click', function() {
-                if (itemIdToDelete) {
-                    deleteItem(itemIdToDelete);
-                }
-                closeConfirmModal();
-            });
-
-            // Busca
-            searchInput.addEventListener('input', function() {
+            searchInput.addEventListener('input', () => {
                 searchTerm = searchInput.value;
                 renderCards();
             });
 
-            // Filtros
-            filterBtns.addEventListener('click', function(e) {
-                const btn = e.target.closest('.filter-btn');
-                if (!btn) return;
-                currentFilter = btn.getAttribute('data-filter');
-                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                renderCards();
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentFilter = btn.dataset.filter;
+                    renderCards();
+                });
             });
 
-            // Fechar modais com tecla ESC
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape') {
-                    if (photoModalOverlay.style.display === 'flex') {
-                        closePhotoModal();
-                    } else if (modalConfirmOverlay.style.display === 'flex') {
-                        closeConfirmModal();
-                    } else if (modalFormOverlay.style.display === 'flex') {
-                        closeFormModal();
-                    }
+            photoInput.addEventListener('change', () => {
+                const file = photoInput.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = e => {
+                        photoPreview.src = e.target.result;
+                        photoPreview.style.display = 'block';
+                        photoUploadArea.classList.add('has-photo');
+                        existingPhoto.value = '';
+                    };
+                    reader.readAsDataURL(file);
                 }
             });
 
-            // ============ INICIALIZAÇÃO ============
-            function init() {
-                loadItemsRealtime();
-                console.log('📦 ESTOQUE DE NÃO CONFORMIDADE (DIMEP) - Conectado ao Firebase.');
-            }
+            window.addEventListener('click', e => {
+                if (e.target === modalFormOverlay) closeFormModal();
+                if (e.target === photoModalOverlay) photoModalOverlay.style.display = 'none';
+                if (e.target === modalConfirmOverlay) modalConfirmOverlay.style.display = 'none';
+            });
 
-            init();
+            document.addEventListener('keydown', e => {
+                if (e.key === 'Escape') {
+                    if (modalFormOverlay.style.display === 'flex') closeFormModal();
+                    if (photoModalOverlay.style.display === 'flex') photoModalOverlay.style.display = 'none';
+                    if (modalConfirmOverlay.style.display === 'flex') modalConfirmOverlay.style.display = 'none';
+                }
+            });
+
+            renderAll();
         })();
     </script>
 </body>
