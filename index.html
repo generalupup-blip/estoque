@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ESTOQUE DE NÃO CONFORMIDADE (DIMEP)</title>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
     <style>
         :root {
             --green-900: #0d3320;
@@ -704,6 +708,31 @@
             opacity: 0;
             cursor: pointer;
         }
+        .btn-remove-photo {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.6);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 5;
+            transition: var(--transition);
+            line-height: 1;
+        }
+        .photo-upload-area.has-photo .btn-remove-photo {
+            display: flex;
+        }
+        .btn-remove-photo:hover {
+            background: rgba(239, 68, 68, 0.8);
+        }
         .btn-save {
             padding: 11px 28px;
             border-radius: 50px;
@@ -1026,6 +1055,7 @@
                             <span class="upload-icon">📷</span>
                             <span class="upload-text">Clique para selecionar uma foto<br><small style="opacity:0.6;">(opcional, formatos JPG/PNG)</small></span>
                             <img id="photoPreview" src="" alt="Preview" style="display:none;">
+                            <button type="button" class="btn-remove-photo" id="btnRemovePhoto" title="Remover foto">🗑️</button>
                             <input type="file" id="photoInput" accept="image/jpeg,image/png,image/webp,image/gif">
                         </div>
                     </div>
@@ -1067,8 +1097,22 @@
 
     <script>
         (function() {
+            // ============ CONFIGURAÇÃO FIREBASE ============
+            const firebaseConfig = {
+                apiKey: "AIzaSyC_LtQbuGX8-de2ouMu8DHX-PicWyepAic",
+                authDomain: "estoquedimep.firebaseapp.com",
+                projectId: "estoquedimep",
+                storageBucket: "estoquedimep.firebasestorage.app",
+                messagingSenderId: "464649699304",
+                appId: "1:464649699304:web:e4472b4917c8471dc4ee5d"
+            };
+
+            firebase.initializeApp(firebaseConfig);
+            const db = firebase.firestore();
+            const storage = firebase.storage();
+            const itensCollection = db.collection('itens');
+
             // ============ CONSTANTES ============
-            const STORAGE_KEY = 'estoque_dimep_data';
             const MAX_IMAGE_WIDTH = 600;
             const MAX_IMAGE_HEIGHT = 600;
             const IMAGE_QUALITY = 0.6;
@@ -1078,6 +1122,7 @@
             let currentFilter = 'todos';
             let searchTerm = '';
             let itemIdToDelete = null;
+            let originalPhotoUrl = null; // guarda a URL da foto antes da edição
 
             // ============ ELEMENTOS DOM ============
             const cardsGrid = document.getElementById('cardsGrid');
@@ -1096,6 +1141,7 @@
             const photoInput = document.getElementById('photoInput');
             const photoPreview = document.getElementById('photoPreview');
             const photoUploadArea = document.getElementById('photoUploadArea');
+            const btnRemovePhoto = document.getElementById('btnRemovePhoto');
             const btnSaveItem = document.getElementById('btnSaveItem');
             const btnCancelForm = document.getElementById('btnCancelForm');
             const btnCloseFormModal = document.getElementById('btnCloseFormModal');
@@ -1112,25 +1158,15 @@
             const countRetrabalho = document.getElementById('countRetrabalho');
             const countTotal = document.getElementById('countTotal');
 
-            // ============ PERSISTÊNCIA ============
-            function loadItems() {
-                try {
-                    const raw = localStorage.getItem(STORAGE_KEY);
-                    items = raw ? JSON.parse(raw) : [];
-                    if (!Array.isArray(items)) items = [];
-                } catch (e) {
-                    items = [];
-                    console.warn('Erro ao carregar dados do localStorage:', e);
-                }
-            }
-
-            function saveItems() {
-                try {
-                    localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-                } catch (e) {
-                    showToast('⚠️ Erro ao salvar: armazenamento cheio. Tente remover alguns itens.', 'error');
-                    console.error('Erro ao salvar no localStorage:', e);
-                }
+            // ============ SINCRONIZAÇÃO EM TEMPO REAL ============
+            function loadItemsRealtime() {
+                itensCollection.orderBy('dataCriacao', 'desc').onSnapshot((snapshot) => {
+                    items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    renderCards();
+                }, (error) => {
+                    console.error("Erro ao carregar itens:", error);
+                    showToast("Erro ao sincronizar dados com o servidor.", "error");
+                });
             }
 
             // ============ COMPRESSÃO DE IMAGEM ============
@@ -1160,16 +1196,44 @@
                             ctx.drawImage(img, 0, 0, w, h);
                             resolve(canvas.toDataURL('image/jpeg', IMAGE_QUALITY));
                         };
-                        img.onerror = function() {
-                            reject(new Error('Erro ao carregar imagem'));
-                        };
+                        img.onerror = () => reject(new Error('Erro ao carregar imagem'));
                         img.src = e.target.result;
                     };
-                    reader.onerror = function() {
-                        reject(new Error('Erro ao ler arquivo'));
-                    };
+                    reader.onerror = () => reject(new Error('Erro ao ler arquivo'));
                     reader.readAsDataURL(file);
                 });
+            }
+
+            function dataURLtoBlob(dataurl) {
+                const arr = dataurl.split(',');
+                const mime = arr[0].match(/:(.*?);/)[1];
+                const bstr = atob(arr[1]);
+                let n = bstr.length;
+                const u8arr = new Uint8Array(n);
+                while (n--) {
+                    u8arr[n] = bstr.charCodeAt(n);
+                }
+                return new Blob([u8arr], { type: mime });
+            }
+
+            // ============ UPLOAD / DELETE FOTO NO STORAGE ============
+            async function uploadPhoto(file) {
+                const compressedDataUrl = await compressImage(file);
+                if (!compressedDataUrl) return '';
+                const blob = dataURLtoBlob(compressedDataUrl);
+                const ref = storage.ref(`fotos/${Date.now()}_${Math.random().toString(36).substr(2,6)}.jpg`);
+                await ref.put(blob);
+                return await ref.getDownloadURL();
+            }
+
+            async function deletePhotoByUrl(url) {
+                if (!url) return;
+                try {
+                    const ref = storage.refFromURL(url);
+                    await ref.delete();
+                } catch (e) {
+                    console.warn('Não foi possível deletar foto do storage:', e);
+                }
             }
 
             // ============ TOAST ============
@@ -1179,9 +1243,7 @@
                 toast.textContent = message;
                 toastContainer.appendChild(toast);
                 setTimeout(() => {
-                    if (toast.parentNode) {
-                        toast.remove();
-                    }
+                    if (toast.parentNode) toast.remove();
                 }, 3000);
             }
 
@@ -1197,6 +1259,7 @@
                     enderecoInput.value = item.endereco;
                     quantidadeInput.value = item.quantidade;
                     existingPhotoInput.value = item.foto || '';
+                    originalPhotoUrl = item.foto || null;
                     if (item.foto) {
                         photoPreview.src = item.foto;
                         photoPreview.style.display = 'block';
@@ -1214,6 +1277,7 @@
                     enderecoInput.value = '';
                     quantidadeInput.value = '1';
                     existingPhotoInput.value = '';
+                    originalPhotoUrl = null;
                     photoPreview.src = '';
                     photoPreview.style.display = 'none';
                     photoUploadArea.classList.remove('has-photo');
@@ -1228,6 +1292,7 @@
                 itemForm.reset();
                 itemIdInput.value = '';
                 existingPhotoInput.value = '';
+                originalPhotoUrl = null;
                 photoPreview.src = '';
                 photoPreview.style.display = 'none';
                 photoUploadArea.classList.remove('has-photo');
@@ -1261,80 +1326,89 @@
                 itemIdToDelete = null;
             }
 
-            // ============ CRUD ============
-            function generateId() {
-                return 'item_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-            }
-
+            // ============ CRUD COM FIREBASE ============
             async function addItem(data, photoFile) {
-                let fotoBase64 = data.existingPhoto || '';
-                if (photoFile && photoFile.size > 0) {
-                    try {
-                        fotoBase64 = await compressImage(photoFile);
-                        if (!fotoBase64) fotoBase64 = '';
-                    } catch (e) {
-                        showToast('⚠️ Erro ao processar imagem. Item salvo sem foto.', 'warning');
-                        fotoBase64 = '';
-                    }
-                }
-                const newItem = {
-                    id: generateId(),
+                const docData = {
                     produto: data.produto.trim(),
                     armazem: data.armazem.trim(),
                     endereco: data.endereco.trim(),
                     quantidade: parseInt(data.quantidade, 10) || 1,
-                    foto: fotoBase64,
+                    foto: '',
                     status: 'pendente',
-                    dataCriacao: new Date().toISOString(),
+                    dataCriacao: firebase.firestore.Timestamp.now(),
                 };
-                items.unshift(newItem);
-                saveItems();
-                renderAll();
-                showToast('✅ Item adicionado com sucesso!', 'success');
-            }
-
-            function updateItem(id, data, photoFile) {
-                const index = items.findIndex(i => i.id === id);
-                if (index === -1) return;
-                const updateData = async () => {
-                    let fotoBase64 = data.existingPhoto || '';
-                    if (photoFile && photoFile.size > 0) {
-                        try {
-                            fotoBase64 = await compressImage(photoFile);
-                            if (!fotoBase64) fotoBase64 = data.existingPhoto || '';
-                        } catch (e) {
-                            fotoBase64 = data.existingPhoto || '';
-                            showToast('⚠️ Erro ao processar nova imagem. Mantida foto anterior.', 'warning');
+                try {
+                    const docRef = await itensCollection.add(docData);
+                    if (photoFile) {
+                        const fotoURL = await uploadPhoto(photoFile);
+                        if (fotoURL) {
+                            await docRef.update({ foto: fotoURL });
                         }
                     }
-                    items[index].produto = data.produto.trim();
-                    items[index].armazem = data.armazem.trim();
-                    items[index].endereco = data.endereco.trim();
-                    items[index].quantidade = parseInt(data.quantidade, 10) || 1;
-                    items[index].foto = fotoBase64;
-                    saveItems();
-                    renderAll();
-                    showToast('✅ Item atualizado com sucesso!', 'success');
+                    showToast('✅ Item adicionado com sucesso!', 'success');
+                } catch (e) {
+                    console.error(e);
+                    showToast('Erro ao adicionar item. Tente novamente.', 'error');
+                }
+            }
+
+            async function updateItem(id, data, photoFile) {
+                const docRef = itensCollection.doc(id);
+                const updateData = {
+                    produto: data.produto.trim(),
+                    armazem: data.armazem.trim(),
+                    endereco: data.endereco.trim(),
+                    quantidade: parseInt(data.quantidade, 10) || 1,
                 };
-                updateData();
+                try {
+                    if (photoFile) {
+                        // Nova foto enviada
+                        const newUrl = await uploadPhoto(photoFile);
+                        updateData.foto = newUrl || '';
+                        if (originalPhotoUrl) {
+                            await deletePhotoByUrl(originalPhotoUrl);
+                        }
+                    } else if (data.existingPhoto === '' && originalPhotoUrl) {
+                        // Foto removida
+                        updateData.foto = '';
+                        await deletePhotoByUrl(originalPhotoUrl);
+                    } else if (data.existingPhoto) {
+                        // Manteve a foto existente
+                        updateData.foto = data.existingPhoto;
+                    } else {
+                        updateData.foto = '';
+                    }
+                    await docRef.update(updateData);
+                    showToast('✅ Item atualizado com sucesso!', 'success');
+                } catch (e) {
+                    console.error(e);
+                    showToast('Erro ao atualizar item.', 'error');
+                }
             }
 
-            function deleteItem(id) {
-                items = items.filter(i => i.id !== id);
-                saveItems();
-                renderAll();
-                showToast('🗑️ Item excluído permanentemente.', 'info');
-            }
-
-            function changeStatus(id, newStatus) {
+            async function deleteItem(id) {
                 const item = items.find(i => i.id === id);
-                if (!item) return;
-                const oldStatus = item.status;
-                item.status = newStatus;
-                saveItems();
-                renderAll();
-                const statusLabels = { pendente: 'Pendente', refugo: 'Refugo', retrabalho: 'Retrabalho' };
-                showToast(`🔄 Status alterado para "${statusLabels[newStatus]}".`, 'info');
+                if (item && item.foto) {
+                    await deletePhotoByUrl(item.foto).catch(() => {});
+                }
+                try {
+                    await itensCollection.doc(id).delete();
+                    showToast('🗑️ Item excluído permanentemente.', 'info');
+                } catch (e) {
+                    console.error(e);
+                    showToast('Erro ao excluir item.', 'error');
+                }
+            }
+
+            async function changeStatus(id, newStatus) {
+                try {
+                    await itensCollection.doc(id).update({ status: newStatus });
+                    const labels = { pendente: 'Pendente', refugo: 'Refugo', retrabalho: 'Retrabalho' };
+                    showToast(`🔄 Status alterado para "${labels[newStatus]}".`, 'info');
+                } catch (e) {
+                    console.error(e);
+                    showToast('Erro ao alterar status.', 'error');
+                }
             }
 
             // ============ RENDERIZAÇÃO ============
@@ -1365,18 +1439,16 @@
                 countTotal.textContent = total;
             }
 
-            function formatDate(isoString) {
-                try {
-                    const date = new Date(isoString);
-                    const day = String(date.getDate()).padStart(2, '0');
-                    const month = String(date.getMonth() + 1).padStart(2, '0');
-                    const year = date.getFullYear();
-                    const hours = String(date.getHours()).padStart(2, '0');
-                    const minutes = String(date.getMinutes()).padStart(2, '0');
-                    return `${day}/${month}/${year} ${hours}:${minutes}`;
-                } catch (e) {
-                    return 'Data inválida';
-                }
+            function formatDate(timestamp) {
+                if (!timestamp) return '';
+                const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+                if (isNaN(date.getTime())) return '';
+                const day = String(date.getDate()).padStart(2, '0');
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const year = date.getFullYear();
+                const hours = String(date.getHours()).padStart(2, '0');
+                const minutes = String(date.getMinutes()).padStart(2, '0');
+                return `${day}/${month}/${year} ${hours}:${minutes}`;
             }
 
             function statusBadgeClass(status) {
@@ -1393,40 +1465,40 @@
                 const filtered = getFilteredItems();
                 if (filtered.length === 0) {
                     cardsGrid.innerHTML = `
-                            <div class="empty-state">
-                                <div class="empty-icon">📭</div>
-                                <h3>Nenhum item encontrado</h3>
-                                <p>${items.length === 0 ? 'Clique em "Adicionar Item" para começar.' : 'Tente ajustar os filtros ou a busca.'}</p>
-                            </div>`;
+                        <div class="empty-state">
+                            <div class="empty-icon">📭</div>
+                            <h3>Nenhum item encontrado</h3>
+                            <p>${items.length === 0 ? 'Clique em "Adicionar Item" para começar.' : 'Tente ajustar os filtros ou a busca.'}</p>
+                        </div>`;
                 } else {
                     cardsGrid.innerHTML = filtered.map(item => `
-                            <div class="card status-${item.status}" data-id="${item.id}">
-                                <div class="card-photo-wrapper" data-action="view-photo" data-photo="${item.foto ? '1' : '0'}" data-id="${item.id}">
-                                    ${item.foto
-                                        ? `<img src="${item.foto}" alt="Foto de ${escapeHTML(item.produto)}" loading="lazy">
-                                           <div class="photo-overlay">🔍</div>`
-                                        : `<div class="card-photo-placeholder">📦</div>`
-                                    }
-                                    <span class="card-badge ${statusBadgeClass(item.status)}">${statusLabel(item.status)}</span>
-                                </div>
-                                <div class="card-body">
-                                    <h3 title="${escapeHTML(item.produto)}">${escapeHTML(truncate(item.produto, 50))}</h3>
-                                    <div class="card-info-row">
-                                        <span class="info-item"><span class="info-icon">🏭</span> ${escapeHTML(truncate(item.armazem, 30))}</span>
-                                        <span class="info-item"><span class="info-icon">📍</span> ${escapeHTML(truncate(item.endereco, 30))}</span>
-                                    </div>
-                                    <span class="card-quantity">📊 Qtd: ${item.quantidade}</span>
-                                    <span class="card-date">📅 ${formatDate(item.dataCriacao)}</span>
-                                </div>
-                                <div class="card-actions">
-                                    <button class="btn-action btn-edit" data-action="edit" data-id="${item.id}">✏️ Editar</button>
-                                    ${item.status !== 'refugo' ? `<button class="btn-action btn-refugo" data-action="refugo" data-id="${item.id}">🗑️ Refugo</button>` : ''}
-                                    ${item.status !== 'retrabalho' ? `<button class="btn-action btn-retrabalho" data-action="retrabalho" data-id="${item.id}">🔧 Retrabalho</button>` : ''}
-                                    ${item.status !== 'pendente' ? `<button class="btn-action btn-edit" data-action="pendente" data-id="${item.id}" style="color:#f59e0b;border-color:#fde68a;background:#fffbeb;">↩️ Reverter</button>` : ''}
-                                    <button class="btn-action btn-delete" data-action="delete" data-id="${item.id}">❌ Excluir</button>
-                                </div>
+                        <div class="card status-${item.status}" data-id="${item.id}">
+                            <div class="card-photo-wrapper" data-action="view-photo" data-photo="${item.foto ? '1' : '0'}" data-id="${item.id}">
+                                ${item.foto
+                                    ? `<img src="${item.foto}" alt="Foto de ${escapeHTML(item.produto)}" loading="lazy">
+                                       <div class="photo-overlay">🔍</div>`
+                                    : `<div class="card-photo-placeholder">📦</div>`
+                                }
+                                <span class="card-badge ${statusBadgeClass(item.status)}">${statusLabel(item.status)}</span>
                             </div>
-                        `).join('');
+                            <div class="card-body">
+                                <h3 title="${escapeHTML(item.produto)}">${escapeHTML(truncate(item.produto, 50))}</h3>
+                                <div class="card-info-row">
+                                    <span class="info-item"><span class="info-icon">🏭</span> ${escapeHTML(truncate(item.armazem, 30))}</span>
+                                    <span class="info-item"><span class="info-icon">📍</span> ${escapeHTML(truncate(item.endereco, 30))}</span>
+                                </div>
+                                <span class="card-quantity">📊 Qtd: ${item.quantidade}</span>
+                                <span class="card-date">📅 ${formatDate(item.dataCriacao)}</span>
+                            </div>
+                            <div class="card-actions">
+                                <button class="btn-action btn-edit" data-action="edit" data-id="${item.id}">✏️ Editar</button>
+                                ${item.status !== 'refugo' ? `<button class="btn-action btn-refugo" data-action="refugo" data-id="${item.id}">🗑️ Refugo</button>` : ''}
+                                ${item.status !== 'retrabalho' ? `<button class="btn-action btn-retrabalho" data-action="retrabalho" data-id="${item.id}">🔧 Retrabalho</button>` : ''}
+                                ${item.status !== 'pendente' ? `<button class="btn-action btn-edit" data-action="pendente" data-id="${item.id}" style="color:#f59e0b;border-color:#fde68a;background:#fffbeb;">↩️ Reverter</button>` : ''}
+                                <button class="btn-action btn-delete" data-action="delete" data-id="${item.id}">❌ Excluir</button>
+                            </div>
+                        </div>
+                    `).join('');
                 }
                 updateHeaderStats();
             }
@@ -1438,12 +1510,9 @@
             }
 
             function truncate(str, maxLen) {
+                if (!str) return '';
                 if (str.length <= maxLen) return str;
                 return str.substring(0, maxLen - 3) + '...';
-            }
-
-            function renderAll() {
-                renderCards();
             }
 
             // ============ EVENT DELEGATION PARA CARDS ============
@@ -1485,7 +1554,6 @@
                 }
             });
 
-            // Também permite clicar na wrapper da foto
             cardsGrid.addEventListener('click', function(e) {
                 const wrapper = e.target.closest('.card-photo-wrapper');
                 if (!wrapper) return;
@@ -1506,6 +1574,16 @@
             btnCancelForm.addEventListener('click', closeFormModal);
             modalFormOverlay.addEventListener('click', function(e) {
                 if (e.target === modalFormOverlay) closeFormModal();
+            });
+
+            // Remover foto no modal
+            btnRemovePhoto.addEventListener('click', function(e) {
+                e.stopPropagation();
+                existingPhotoInput.value = '';
+                photoPreview.src = '';
+                photoPreview.style.display = 'none';
+                photoUploadArea.classList.remove('has-photo');
+                photoInput.value = '';
             });
 
             btnSaveItem.addEventListener('click', async function() {
@@ -1562,6 +1640,7 @@
                         photoPreview.src = e.target.result;
                         photoPreview.style.display = 'block';
                         photoUploadArea.classList.add('has-photo');
+                        existingPhotoInput.value = ''; // indica que uma nova foto foi selecionada
                     };
                     reader.readAsDataURL(file);
                 } else if (!file && existingPhotoInput.value) {
@@ -1604,8 +1683,7 @@
                 const btn = e.target.closest('.filter-btn');
                 if (!btn) return;
                 currentFilter = btn.getAttribute('data-filter');
-                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove(
-                'active'));
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 renderCards();
             });
@@ -1625,11 +1703,8 @@
 
             // ============ INICIALIZAÇÃO ============
             function init() {
-                loadItems();
-                renderAll();
-                if (items.length === 0) {
-                    console.log('📦 ESTOQUE DE NÃO CONFORMIDADE (DIMEP) - Pronto para uso.');
-                }
+                loadItemsRealtime();
+                console.log('📦 ESTOQUE DE NÃO CONFORMIDADE (DIMEP) - Conectado ao Firebase.');
             }
 
             init();
