@@ -4,9 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ESTOQUE DE NÃO CONFORMIDADE (DIMEP)</title>
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
     <style>
         :root {
             --green-900: #0d3320; --green-800: #14532d; --green-700: #1a5632; --green-600: #1f6e3e;
@@ -140,245 +137,378 @@
         </div>
     </div>
 
-    <script>
-        // Firebase init
-        firebase.initializeApp({
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
+        import { getFirestore, collection, doc, getDoc, setDoc, addDoc, updateDoc, deleteDoc, onSnapshot, orderBy, query, Timestamp, getDocs } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject, refFromURL } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-storage.js";
+
+        const firebaseConfig = {
             apiKey: "AIzaSyC_LtQbuGX8-de2ouMu8DHX-PicWyepAic",
             authDomain: "estoquedimep.firebaseapp.com",
             projectId: "estoquedimep",
             storageBucket: "estoquedimep.firebasestorage.app",
             messagingSenderId: "464649699304",
             appId: "1:464649699304:web:e4472b4917c8471dc4ee5d"
-        });
-        const db = firebase.firestore();
-        const storage = firebase.storage();
-        const col = db.collection('itens');
+        };
 
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const storage = getStorage(app);
+        const colRef = collection(db, 'itens');
+
+        // Estado
         let items = [], useFirebase = false, currentFilter = 'todos', searchTerm = '', deleteId = null;
 
-        async function testFB() {
-            try { await col.doc('_test_').get(); return true; } catch { return false; }
-        }
-
+        // Helpers localStorage
         function loadLocal() {
-            items = JSON.parse(localStorage.getItem('dimep_fallback')||'[]');
+            items = JSON.parse(localStorage.getItem('dimep_fallback') || '[]');
         }
-        function saveLocal() { localStorage.setItem('dimep_fallback', JSON.stringify(items)); }
-
-        function loadData() {
-            if (useFirebase) {
-                col.orderBy('dataCriacao','desc').onSnapshot(snap => {
-                    items = snap.docs.map(d => ({id:d.id, ...d.data()}));
-                    render();
-                }, err => { useFirebase=false; loadLocal(); render(); });
-            } else { loadLocal(); render(); }
+        function saveLocal() {
+            localStorage.setItem('dimep_fallback', JSON.stringify(items));
         }
 
-        function compress(file) {
-            return new Promise(ok => {
-                if (!file) return ok('');
-                const r = new FileReader();
-                r.onload = e => {
+        // Compressão de imagem
+        function compressImage(file) {
+            return new Promise(resolve => {
+                if (!file) return resolve('');
+                const reader = new FileReader();
+                reader.onload = e => {
                     const img = new Image();
                     img.onload = () => {
-                        const max=600; let w=img.width, h=img.height;
-                        if(w<=max && h<=max) return ok(e.target.result);
-                        const ratio = Math.min(max/w, max/h);
-                        const c=document.createElement('canvas'); c.width=w*ratio; c.height=h*ratio;
-                        c.getContext('2d').drawImage(img,0,0,c.width,c.height);
-                        ok(c.toDataURL('image/jpeg',0.6));
+                        const maxW = 600, maxH = 600;
+                        let w = img.width, h = img.height;
+                        if (w <= maxW && h <= maxH) return resolve(e.target.result);
+                        const ratio = Math.min(maxW / w, maxH / h);
+                        const canvas = document.createElement('canvas');
+                        canvas.width = w * ratio;
+                        canvas.height = h * ratio;
+                        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+                        resolve(canvas.toDataURL('image/jpeg', 0.6));
                     };
-                    img.src=e.target.result;
+                    img.src = e.target.result;
                 };
-                r.readAsDataURL(file);
+                reader.readAsDataURL(file);
             });
         }
 
-        function dataURLtoBlob(url) {
-            const arr=url.split(','), mime=arr[0].match(/:(.*?);/)[1], bstr=atob(arr[1]), n=bstr.length, u8=new Uint8Array(n);
-            while(n--) u8[n]=bstr.charCodeAt(n);
-            return new Blob([u8],{type:mime});
+        function dataURLtoBlob(dataurl) {
+            const arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1];
+            const bstr = atob(arr[1]), n = bstr.length, u8 = new Uint8Array(n);
+            while (n--) u8[n] = bstr.charCodeAt(n);
+            return new Blob([u8], { type: mime });
+        }
+
+        // Teste conexão Firebase
+        async function testFB() {
+            try {
+                const testDoc = doc(db, 'itens', '__connection_test__');
+                await getDoc(testDoc);
+                return true;
+            } catch {
+                return false;
+            }
+        }
+
+        // Carregar dados
+        function loadData() {
+            if (useFirebase) {
+                const q = query(colRef, orderBy('dataCriacao', 'desc'));
+                onSnapshot(q, snapshot => {
+                    items = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+                    render();
+                }, error => {
+                    console.error('Erro Firestore, usando localStorage.', error);
+                    useFirebase = false;
+                    loadLocal();
+                    render();
+                });
+            } else {
+                loadLocal();
+                render();
+            }
         }
 
         async function addItem(data, file) {
             if (useFirebase) {
                 try {
-                    const ref = await col.add({...data, foto:'', status:'pendente', dataCriacao:firebase.firestore.Timestamp.now()});
+                    const docRef = await addDoc(colRef, {
+                        ...data,
+                        foto: '',
+                        status: 'pendente',
+                        dataCriacao: Timestamp.now()
+                    });
                     if (file) {
-                        const comp = await compress(file);
-                        if(comp) {
-                            const blob = dataURLtoBlob(comp);
-                            const stRef = storage.ref(`fotos/${Date.now()}.jpg`);
-                            await stRef.put(blob);
-                            const url = await stRef.getDownloadURL();
-                            await ref.update({foto:url});
+                        const compressed = await compressImage(file);
+                        if (compressed) {
+                            const blob = dataURLtoBlob(compressed);
+                            const storageRef = ref(storage, `fotos/${Date.now()}.jpg`);
+                            await uploadBytes(storageRef, blob);
+                            const url = await getDownloadURL(storageRef);
+                            await updateDoc(docRef, { foto: url });
                         }
                     }
                     return;
-                } catch { useFirebase=false; }
+                } catch (e) {
+                    console.error('Erro ao adicionar no Firebase', e);
+                    useFirebase = false;
+                }
             }
-            const foto = file ? await compress(file) : '';
-            items.unshift({id:Date.now().toString(36)+Math.random().toString(36).substr(2), ...data, foto, status:'pendente', dataCriacao:new Date().toISOString()});
-            saveLocal(); render();
+            // Fallback local
+            const foto = file ? await compressImage(file) : '';
+            items.unshift({
+                id: Date.now().toString(36) + Math.random().toString(36).substr(2),
+                ...data,
+                foto,
+                status: 'pendente',
+                dataCriacao: new Date().toISOString()
+            });
+            saveLocal();
+            render();
         }
 
         async function updateItem(id, data, file) {
             if (useFirebase) {
                 try {
-                    const ref = col.doc(id);
-                    const upd = {...data};
+                    const docRef = doc(db, 'itens', id);
+                    const updateObj = { ...data };
                     if (file) {
-                        const comp = await compress(file);
-                        if(comp) {
-                            const blob = dataURLtoBlob(comp);
-                            const stRef = storage.ref(`fotos/${Date.now()}.jpg`);
-                            await stRef.put(blob);
-                            upd.foto = await stRef.getDownloadURL();
-                            const old = items.find(i=>i.id===id);
-                            if(old?.foto) try{await storage.refFromURL(old.foto).delete();}catch(e){}
+                        const compressed = await compressImage(file);
+                        if (compressed) {
+                            const blob = dataURLtoBlob(compressed);
+                            const storageRef = ref(storage, `fotos/${Date.now()}.jpg`);
+                            await uploadBytes(storageRef, blob);
+                            updateObj.foto = await getDownloadURL(storageRef);
+                            // Deletar foto antiga
+                            const oldItem = items.find(i => i.id === id);
+                            if (oldItem && oldItem.foto) {
+                                try {
+                                    const oldRef = refFromURL(storage, oldItem.foto);
+                                    await deleteObject(oldRef);
+                                } catch (e) { /* ignorar erro */ }
+                            }
                         }
                     } else if (data.foto === '' && !file) {
-                        const old = items.find(i=>i.id===id);
-                        if(old?.foto) try{await storage.refFromURL(old.foto).delete();}catch(e){}
-                        upd.foto = '';
+                        const oldItem = items.find(i => i.id === id);
+                        if (oldItem && oldItem.foto) {
+                            try {
+                                const oldRef = refFromURL(storage, oldItem.foto);
+                                await deleteObject(oldRef);
+                            } catch (e) { /* ignorar */ }
+                        }
+                        updateObj.foto = '';
                     }
-                    await ref.update(upd);
+                    await updateDoc(docRef, updateObj);
                     return;
-                } catch { useFirebase=false; }
+                } catch (e) {
+                    console.error('Erro ao atualizar no Firebase', e);
+                    useFirebase = false;
+                }
             }
-            const idx = items.findIndex(i=>i.id===id);
-            if(idx===-1) return;
-            items[idx] = {...items[idx], ...data};
-            if(file) items[idx].foto = await compress(file);
-            else if(data.foto==='' && !file) items[idx].foto = '';
-            saveLocal(); render();
+            // Fallback local
+            const idx = items.findIndex(i => i.id === id);
+            if (idx === -1) return;
+            items[idx] = { ...items[idx], ...data };
+            if (file) {
+                items[idx].foto = await compressImage(file);
+            } else if (data.foto === '' && !file) {
+                items[idx].foto = '';
+            }
+            saveLocal();
+            render();
         }
 
         async function deleteItem(id) {
-            const item = items.find(i=>i.id===id);
+            const item = items.find(i => i.id === id);
             if (useFirebase) {
                 try {
-                    if(item?.foto) try{await storage.refFromURL(item.foto).delete();}catch(e){}
-                    await col.doc(id).delete();
-                } catch { useFirebase=false; items=items.filter(i=>i.id!==id); saveLocal(); render(); }
-            } else { items=items.filter(i=>i.id!==id); saveLocal(); render(); }
+                    if (item && item.foto) {
+                        try {
+                            const oldRef = refFromURL(storage, item.foto);
+                            await deleteObject(oldRef);
+                        } catch (e) { /* ignorar */ }
+                    }
+                    await deleteDoc(doc(db, 'itens', id));
+                } catch (e) {
+                    console.error('Erro ao deletar no Firebase', e);
+                    useFirebase = false;
+                    items = items.filter(i => i.id !== id);
+                    saveLocal();
+                    render();
+                }
+            } else {
+                items = items.filter(i => i.id !== id);
+                saveLocal();
+                render();
+            }
         }
 
-        async function changeStatus(id, status) {
+        async function changeStatus(id, newStatus) {
             if (useFirebase) {
-                try { await col.doc(id).update({status}); } catch { useFirebase=false; }
+                try {
+                    await updateDoc(doc(db, 'itens', id), { status: newStatus });
+                } catch (e) {
+                    useFirebase = false;
+                }
             }
-            const item = items.find(i=>i.id===id);
-            if(item) { item.status=status; if(!useFirebase) saveLocal(); render(); }
+            if (!useFirebase) {
+                const item = items.find(i => i.id === id);
+                if (item) {
+                    item.status = newStatus;
+                    saveLocal();
+                    render();
+                }
+            }
         }
 
         function render() {
-            let filt = items;
-            if(currentFilter!=='todos') filt=filt.filter(i=>i.status===currentFilter);
-            if(searchTerm) {
-                const t=searchTerm.toLowerCase();
-                filt=filt.filter(i=>i.produto.toLowerCase().includes(t)||i.armazem.toLowerCase().includes(t)||i.endereco.toLowerCase().includes(t));
+            let filtered = items;
+            if (currentFilter !== 'todos') filtered = filtered.filter(i => i.status === currentFilter);
+            if (searchTerm) {
+                const term = searchTerm.toLowerCase();
+                filtered = filtered.filter(i => i.produto.toLowerCase().includes(term) || i.armazem.toLowerCase().includes(term) || i.endereco.toLowerCase().includes(term));
             }
             const grid = document.getElementById('cardsGrid');
-            if(!filt.length) grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:60px;">Nenhum item.</div>';
-            else grid.innerHTML = filt.map(i=>`
-                <div class="card status-${i.status}">
-                    <div class="card-photo-wrapper" onclick="openPhoto('${i.foto||''}')">
-                        ${i.foto?`<img src="${i.foto}"><div class="photo-overlay">🔍</div>`:'<div style="height:100%;display:flex;align-items:center;justify-content:center;font-size:3rem;color:#cdd3d9;">📦</div>'}
-                        <span class="card-badge badge-${i.status}">${i.status}</span>
+            if (filtered.length === 0) {
+                grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:60px;color:#7a8793;">Nenhum item encontrado</div>';
+            } else {
+                grid.innerHTML = filtered.map(item => `
+                    <div class="card status-${item.status}">
+                        <div class="card-photo-wrapper" onclick="window.openPhoto && window.openPhoto('${item.foto || ''}')">
+                            ${item.foto ? `<img src="${item.foto}" alt="Foto"><div class="photo-overlay">🔍</div>` : '<div style="height:100%;display:flex;align-items:center;justify-content:center;font-size:3rem;color:#cdd3d9;">📦</div>'}
+                            <span class="card-badge badge-${item.status}">${item.status}</span>
+                        </div>
+                        <div class="card-body">
+                            <h3>${escapeHtml(item.produto)}</h3>
+                            <div class="card-info-row"><span>🏭 ${escapeHtml(item.armazem)}</span><span>📍 ${escapeHtml(item.endereco)}</span></div>
+                            <span class="card-quantity">📊 Qtd: ${item.quantidade}</span>
+                        </div>
+                        <div class="card-actions">
+                            <button class="btn-action btn-edit" onclick="window.editItem && window.editItem('${item.id}')">✏️ Editar</button>
+                            ${item.status !== 'refugo' ? `<button class="btn-action btn-refugo" onclick="window.changeStatus && window.changeStatus('${item.id}','refugo')">🗑️ Refugo</button>` : ''}
+                            ${item.status !== 'retrabalho' ? `<button class="btn-action btn-retrabalho" onclick="window.changeStatus && window.changeStatus('${item.id}','retrabalho')">🔧 Retrabalho</button>` : ''}
+                            ${item.status !== 'pendente' ? `<button class="btn-action btn-edit" onclick="window.changeStatus && window.changeStatus('${item.id}','pendente')">↩️ Reverter</button>` : ''}
+                            <button class="btn-action btn-delete" onclick="window.confirmDelete && window.confirmDelete('${item.id}','${escapeHtml(item.produto)}')">❌</button>
+                        </div>
                     </div>
-                    <div class="card-body">
-                        <h3>${i.produto}</h3>
-                        <div class="card-info-row"><span>🏭 ${i.armazem}</span><span>📍 ${i.endereco}</span></div>
-                        <span class="card-quantity">📊 Qtd: ${i.quantidade}</span>
-                    </div>
-                    <div class="card-actions">
-                        <button class="btn-action btn-edit" onclick="editItem('${i.id}')">✏️ Editar</button>
-                        ${i.status!=='refugo'?`<button class="btn-action btn-refugo" onclick="changeStatus('${i.id}','refugo')">🗑️ Refugo</button>`:''}
-                        ${i.status!=='retrabalho'?`<button class="btn-action btn-retrabalho" onclick="changeStatus('${i.id}','retrabalho')">🔧 Retrabalho</button>`:''}
-                        ${i.status!=='pendente'?`<button class="btn-action btn-edit" onclick="changeStatus('${i.id}','pendente')">↩️ Reverter</button>`:''}
-                        <button class="btn-action btn-delete" onclick="confirmDelete('${i.id}','${i.produto}')">❌</button>
-                    </div>
-                </div>`).join('');
-            document.getElementById('countPendente').textContent=items.filter(i=>i.status==='pendente').length;
-            document.getElementById('countRefugo').textContent=items.filter(i=>i.status==='refugo').length;
-            document.getElementById('countRetrabalho').textContent=items.filter(i=>i.status==='retrabalho').length;
-            document.getElementById('countTotal').textContent=items.length;
+                `).join('');
+            }
+            document.getElementById('countPendente').textContent = items.filter(i => i.status === 'pendente').length;
+            document.getElementById('countRefugo').textContent = items.filter(i => i.status === 'refugo').length;
+            document.getElementById('countRetrabalho').textContent = items.filter(i => i.status === 'retrabalho').length;
+            document.getElementById('countTotal').textContent = items.length;
         }
 
-        function openPhoto(url) { if(url) { document.getElementById('photoModalImg').src=url; document.getElementById('photoModal').style.display='flex'; } }
-        function editItem(id) {
-            const item = items.find(i=>i.id===id); if(!item) return;
-            document.getElementById('modalTitle').textContent='Editar Item';
-            document.getElementById('itemId').value=id;
-            document.getElementById('produto').value=item.produto;
-            document.getElementById('armazem').value=item.armazem;
-            document.getElementById('endereco').value=item.endereco;
-            document.getElementById('quantidade').value=item.quantidade;
-            document.getElementById('existingPhoto').value=item.foto||'';
-            const preview=document.getElementById('photoPreview'), area=document.getElementById('photoArea');
-            if(item.foto){ preview.src=item.foto; preview.style.display='block'; area.classList.add('has-photo'); }
-            else { preview.style.display='none'; area.classList.remove('has-photo'); }
-            document.getElementById('modalForm').style.display='flex';
+        function escapeHtml(text) {
+            return text.replace(/[&<>"']/g, function(m) {
+                return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m];
+            });
         }
-        function confirmDelete(id, nome) { deleteId=id; document.getElementById('confirmMsg').textContent=`Excluir "${nome}"?`; document.getElementById('confirmModal').style.display='flex'; }
 
-        document.getElementById('btnAddItem').onclick=()=>{
-            document.getElementById('modalTitle').textContent='Adicionar Item';
-            document.getElementById('itemId').value='';
-            ['produto','armazem','endereco'].forEach(id=>document.getElementById(id).value='');
-            document.getElementById('quantidade').value='1';
-            document.getElementById('existingPhoto').value='';
-            document.getElementById('photoPreview').style.display='none';
-            document.getElementById('photoArea').classList.remove('has-photo');
-            document.getElementById('modalForm').style.display='flex';
-        };
-        document.getElementById('btnCloseModal').onclick=()=>document.getElementById('modalForm').style.display='none';
-        document.getElementById('btnCancel').onclick=()=>document.getElementById('modalForm').style.display='none';
-        document.getElementById('btnSave').onclick=async ()=>{
-            const id=document.getElementById('itemId').value;
-            const data={
-                produto:document.getElementById('produto').value.trim(),
-                armazem:document.getElementById('armazem').value.trim(),
-                endereco:document.getElementById('endereco').value.trim(),
-                quantidade:parseInt(document.getElementById('quantidade').value)||1,
-                foto:document.getElementById('existingPhoto').value
-            };
-            if(!data.produto||!data.armazem||!data.endereco) return alert('Preencha todos os campos obrigatórios.');
-            const file=document.getElementById('photoInput').files[0];
-            if(id) await updateItem(id, data, file);
-            else await addItem(data, file);
-            document.getElementById('modalForm').style.display='none';
-        };
-        document.getElementById('photoInput').onchange=function(){
-            const f=this.files[0];
-            if(f){
-                const r=new FileReader();
-                r.onload=e=>{
-                    document.getElementById('photoPreview').src=e.target.result;
-                    document.getElementById('photoPreview').style.display='block';
-                    document.getElementById('photoArea').classList.add('has-photo');
-                    document.getElementById('existingPhoto').value='';
-                };
-                r.readAsDataURL(f);
+        // Expondo funções para o escopo global (necessário para onclick inline)
+        window.openPhoto = function(url) {
+            if (url) {
+                document.getElementById('photoModalImg').src = url;
+                document.getElementById('photoModal').style.display = 'flex';
             }
         };
-        document.getElementById('searchInput').oninput=function(){ searchTerm=this.value; render(); };
-        document.querySelectorAll('.filter-btn').forEach(b=>b.onclick=function(){
-            document.querySelectorAll('.filter-btn').forEach(x=>x.classList.remove('active'));
-            this.classList.add('active');
-            currentFilter=this.dataset.filter;
-            render();
-        });
-        document.getElementById('btnCancelConfirm').onclick=()=>document.getElementById('confirmModal').style.display='none';
-        document.getElementById('btnConfirmDelete').onclick=async ()=>{
-            if(deleteId) await deleteItem(deleteId);
-            document.getElementById('confirmModal').style.display='none';
+        window.editItem = function(id) {
+            const item = items.find(i => i.id === id);
+            if (!item) return;
+            document.getElementById('modalTitle').textContent = 'Editar Item';
+            document.getElementById('itemId').value = id;
+            document.getElementById('produto').value = item.produto;
+            document.getElementById('armazem').value = item.armazem;
+            document.getElementById('endereco').value = item.endereco;
+            document.getElementById('quantidade').value = item.quantidade;
+            document.getElementById('existingPhoto').value = item.foto || '';
+            const preview = document.getElementById('photoPreview');
+            const area = document.getElementById('photoArea');
+            if (item.foto) {
+                preview.src = item.foto;
+                preview.style.display = 'block';
+                area.classList.add('has-photo');
+            } else {
+                preview.style.display = 'none';
+                area.classList.remove('has-photo');
+            }
+            document.getElementById('modalForm').style.display = 'flex';
+        };
+        window.changeStatus = (id, newStatus) => changeStatus(id, newStatus);
+        window.confirmDelete = function(id, nome) {
+            deleteId = id;
+            document.getElementById('confirmMsg').textContent = `Excluir "${nome}"?`;
+            document.getElementById('confirmModal').style.display = 'flex';
         };
 
-        (async function(){
+        // Eventos da interface
+        document.getElementById('btnAddItem').addEventListener('click', () => {
+            document.getElementById('modalTitle').textContent = 'Adicionar Item';
+            document.getElementById('itemId').value = '';
+            ['produto', 'armazem', 'endereco'].forEach(id => document.getElementById(id).value = '');
+            document.getElementById('quantidade').value = '1';
+            document.getElementById('existingPhoto').value = '';
+            document.getElementById('photoPreview').style.display = 'none';
+            document.getElementById('photoArea').classList.remove('has-photo');
+            document.getElementById('modalForm').style.display = 'flex';
+        });
+        document.getElementById('btnCloseModal').addEventListener('click', () => document.getElementById('modalForm').style.display = 'none');
+        document.getElementById('btnCancel').addEventListener('click', () => document.getElementById('modalForm').style.display = 'none');
+        document.getElementById('btnSave').addEventListener('click', async () => {
+            const id = document.getElementById('itemId').value;
+            const data = {
+                produto: document.getElementById('produto').value.trim(),
+                armazem: document.getElementById('armazem').value.trim(),
+                endereco: document.getElementById('endereco').value.trim(),
+                quantidade: parseInt(document.getElementById('quantidade').value) || 1,
+                foto: document.getElementById('existingPhoto').value
+            };
+            if (!data.produto || !data.armazem || !data.endereco) {
+                alert('Preencha todos os campos obrigatórios.');
+                return;
+            }
+            const file = document.getElementById('photoInput').files[0];
+            if (id) {
+                await updateItem(id, data, file);
+            } else {
+                await addItem(data, file);
+            }
+            document.getElementById('modalForm').style.display = 'none';
+        });
+        document.getElementById('photoInput').addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = e => {
+                    document.getElementById('photoPreview').src = e.target.result;
+                    document.getElementById('photoPreview').style.display = 'block';
+                    document.getElementById('photoArea').classList.add('has-photo');
+                    document.getElementById('existingPhoto').value = '';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+        document.getElementById('searchInput').addEventListener('input', function() {
+            searchTerm = this.value;
+            render();
+        });
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                currentFilter = this.dataset.filter;
+                render();
+            });
+        });
+        document.getElementById('btnCancelConfirm').addEventListener('click', () => document.getElementById('confirmModal').style.display = 'none');
+        document.getElementById('btnConfirmDelete').addEventListener('click', async () => {
+            if (deleteId) await deleteItem(deleteId);
+            document.getElementById('confirmModal').style.display = 'none';
+        });
+
+        // Inicialização
+        (async function init() {
             useFirebase = await testFB();
-            console.log(useFirebase ? '✅ Usando Firebase' : '⚠️ Usando localStorage');
+            console.log(useFirebase ? '✅ Conectado ao Firebase (modular)' : '⚠️ Modo offline (localStorage)');
             loadData();
         })();
     </script>
