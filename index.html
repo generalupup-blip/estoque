@@ -1,0 +1,1639 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESTOQUE DE NÃO CONFORMIDADE (DIMEP)</title>
+    <style>
+        :root {
+            --green-900: #0d3320;
+            --green-800: #14532d;
+            --green-700: #1a5632;
+            --green-600: #1f6e3e;
+            --green-500: #2d7a46;
+            --green-400: #3d8b54;
+            --green-300: #5ca870;
+            --green-200: #8cc99a;
+            --green-100: #b8e0c2;
+            --green-50: #e8f5e9;
+            --green-25: #f4faf5;
+            --white: #ffffff;
+            --gray-50: #f8f9fa;
+            --gray-100: #f0f2f4;
+            --gray-200: #e2e6ea;
+            --gray-300: #cdd3d9;
+            --gray-400: #a3aeb8;
+            --gray-500: #7a8793;
+            --gray-600: #5c6670;
+            --gray-700: #424a52;
+            --gray-800: #2b3138;
+            --gray-900: #1a1e23;
+            --amber-500: #f59e0b;
+            --amber-100: #fef3c7;
+            --amber-700: #b45309;
+            --red-500: #ef4444;
+            --red-100: #fee2e2;
+            --red-700: #b91c1c;
+            --blue-500: #3b82f6;
+            --blue-100: #dbeafe;
+            --blue-700: #1d4ed8;
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.1), 0 4px 10px rgba(0, 0, 0, 0.08);
+            --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.15);
+            --radius-sm: 6px;
+            --radius: 10px;
+            --radius-lg: 16px;
+            --radius-xl: 20px;
+            --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-slow: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Inter', system-ui, -apple-system, sans-serif;
+            background: #f0f4f2;
+            color: var(--gray-800);
+            min-height: 100vh;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* ============ HEADER ============ */
+        .header {
+            background: linear-gradient(135deg, var(--green-800) 0%, var(--green-700) 40%, var(--green-600) 100%);
+            color: white;
+            padding: 0 28px;
+            height: 68px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 12px rgba(13, 51, 32, 0.25);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            gap: 16px;
+        }
+        .header-logo {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-shrink: 0;
+        }
+        .header-icon {
+            width: 42px;
+            height: 42px;
+            background: rgba(255, 255, 255, 0.18);
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            backdrop-filter: blur(4px);
+        }
+        .header h1 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            white-space: nowrap;
+            line-height: 1.3;
+        }
+        .header h1 span {
+            display: block;
+            font-size: 0.7rem;
+            font-weight: 400;
+            opacity: 0.85;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+        .header-stats {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+        .stat-pill {
+            background: rgba(255, 255, 255, 0.13);
+            backdrop-filter: blur(4px);
+            padding: 7px 15px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            white-space: nowrap;
+            letter-spacing: 0.01em;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            transition: var(--transition);
+        }
+        .stat-pill .dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .dot-pendente {
+            background: var(--amber-500);
+            box-shadow: 0 0 8px rgba(245, 158, 11, 0.6);
+        }
+        .dot-refugo {
+            background: var(--red-500);
+            box-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
+        }
+        .dot-retrabalho {
+            background: var(--blue-500);
+            box-shadow: 0 0 8px rgba(59, 130, 246, 0.6);
+        }
+
+        /* ============ MAIN CONTENT ============ */
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 24px 20px 40px;
+        }
+
+        /* ============ TOOLBAR ============ */
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+        }
+        .toolbar-left {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+            flex: 1;
+            min-width: 0;
+        }
+        .search-box {
+            position: relative;
+            flex: 1;
+            min-width: 220px;
+            max-width: 400px;
+        }
+        .search-box input {
+            width: 100%;
+            padding: 11px 16px 11px 42px;
+            border: 2px solid var(--gray-200);
+            border-radius: 50px;
+            font-size: 0.9rem;
+            background: var(--white);
+            transition: var(--transition);
+            color: var(--gray-800);
+            outline: none;
+        }
+        .search-box input:focus {
+            border-color: var(--green-400);
+            box-shadow: 0 0 0 3px rgba(45, 122, 70, 0.1);
+        }
+        .search-box .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.1rem;
+            color: var(--gray-400);
+            pointer-events: none;
+        }
+        .filter-btns {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .filter-btn {
+            padding: 9px 16px;
+            border-radius: 50px;
+            border: 2px solid var(--gray-200);
+            background: var(--white);
+            cursor: pointer;
+            font-size: 0.82rem;
+            font-weight: 600;
+            transition: var(--transition);
+            color: var(--gray-600);
+            white-space: nowrap;
+            letter-spacing: 0.01em;
+        }
+        .filter-btn:hover {
+            border-color: var(--green-300);
+            color: var(--green-700);
+            background: var(--green-25);
+        }
+        .filter-btn.active {
+            background: var(--green-700);
+            color: white;
+            border-color: var(--green-700);
+            box-shadow: var(--shadow-md);
+        }
+        .btn-add {
+            padding: 11px 22px;
+            border-radius: 50px;
+            border: none;
+            background: var(--green-700);
+            color: white;
+            cursor: pointer;
+            font-size: 0.88rem;
+            font-weight: 700;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+            letter-spacing: 0.01em;
+            box-shadow: var(--shadow);
+            flex-shrink: 0;
+        }
+        .btn-add:hover {
+            background: var(--green-600);
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-1px);
+        }
+        .btn-add:active {
+            transform: translateY(0);
+            box-shadow: var(--shadow-sm);
+        }
+        .btn-add .plus-icon {
+            font-size: 1.3rem;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        /* ============ CARDS GRID ============ */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 18px;
+        }
+        .empty-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--gray-500);
+        }
+        .empty-state .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+        .empty-state h3 {
+            font-size: 1.3rem;
+            color: var(--gray-600);
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+        .empty-state p {
+            font-size: 0.9rem;
+            color: var(--gray-400);
+        }
+
+        /* ============ CARD ============ */
+        .card {
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: var(--transition-slow);
+            display: flex;
+            flex-direction: column;
+            border: 1px solid var(--gray-100);
+            position: relative;
+            cursor: default;
+        }
+        .card:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-3px);
+            border-color: var(--gray-200);
+        }
+        .card.status-pendente {
+            border-left: 4px solid var(--amber-500);
+        }
+        .card.status-refugo {
+            border-left: 4px solid var(--red-500);
+            background: #fffafa;
+        }
+        .card.status-retrabalho {
+            border-left: 4px solid var(--blue-500);
+            background: #fafcff;
+        }
+        .card-photo-wrapper {
+            position: relative;
+            width: 100%;
+            height: 200px;
+            background: var(--gray-100);
+            cursor: pointer;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        .card-photo-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+        .card-photo-wrapper:hover img {
+            transform: scale(1.06);
+        }
+        .card-photo-wrapper .photo-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0);
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.2rem;
+            color: white;
+            opacity: 0;
+            pointer-events: none;
+        }
+        .card-photo-wrapper:hover .photo-overlay {
+            background: rgba(0, 0, 0, 0.35);
+            opacity: 1;
+        }
+        .card-photo-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3.5rem;
+            color: var(--gray-300);
+            background: linear-gradient(135deg, var(--gray-50), var(--gray-100));
+        }
+        .card-badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            padding: 6px 13px;
+            border-radius: 50px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+            z-index: 2;
+            pointer-events: none;
+            box-shadow: var(--shadow-sm);
+        }
+        .badge-pendente {
+            background: var(--amber-500);
+            color: #fff;
+        }
+        .badge-refugo {
+            background: var(--red-500);
+            color: #fff;
+        }
+        .badge-retrabalho {
+            background: var(--blue-500);
+            color: #fff;
+        }
+        .card-body {
+            padding: 16px 18px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .card-body h3 {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin: 0;
+            line-height: 1.3;
+            letter-spacing: -0.01em;
+        }
+        .card-info-row {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            font-size: 0.8rem;
+            color: var(--gray-600);
+            align-items: center;
+        }
+        .card-info-row .info-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .card-info-row .info-icon {
+            font-size: 0.9rem;
+        }
+        .card-quantity {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: var(--green-50);
+            color: var(--green-800);
+            padding: 4px 12px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 0.82rem;
+            width: fit-content;
+        }
+        .card-date {
+            font-size: 0.7rem;
+            color: var(--gray-400);
+            margin-top: 2px;
+        }
+        .card-actions {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            padding: 10px 18px 16px;
+            border-top: 1px solid var(--gray-100);
+            margin-top: auto;
+        }
+        .btn-action {
+            padding: 7px 13px;
+            border-radius: 50px;
+            border: 1.5px solid var(--gray-200);
+            background: var(--white);
+            cursor: pointer;
+            font-size: 0.75rem;
+            font-weight: 600;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            white-space: nowrap;
+            letter-spacing: 0.01em;
+            color: var(--gray-700);
+        }
+        .btn-action:hover {
+            border-color: var(--gray-400);
+            background: var(--gray-50);
+        }
+        .btn-action.btn-refugo {
+            color: var(--red-700);
+            border-color: #fecaca;
+            background: #fff5f5;
+        }
+        .btn-action.btn-refugo:hover {
+            background: #fef2f2;
+            border-color: #f87171;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.08);
+        }
+        .btn-action.btn-retrabalho {
+            color: var(--blue-700);
+            border-color: #bfdbfe;
+            background: #f5f9ff;
+        }
+        .btn-action.btn-retrabalho:hover {
+            background: #eff6ff;
+            border-color: #60a5fa;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.08);
+        }
+        .btn-action.btn-edit {
+            color: var(--green-700);
+            border-color: #b8e0c2;
+            background: #f9fdf9;
+        }
+        .btn-action.btn-edit:hover {
+            background: #f4faf5;
+            border-color: #5ca870;
+            box-shadow: 0 0 0 3px rgba(45, 122, 70, 0.08);
+        }
+        .btn-action.btn-delete {
+            color: #9ca3af;
+            border-color: #e5e7eb;
+            background: #fafafa;
+        }
+        .btn-action.btn-delete:hover {
+            color: #ef4444;
+            border-color: #fca5a5;
+            background: #fef2f2;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.06);
+        }
+
+        /* ============ MODAL OVERLAY ============ */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.55);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            animation: fadeIn 0.2s ease;
+            backdrop-filter: blur(2px);
+            -webkit-backdrop-filter: blur(2px);
+        }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px) scale(0.96);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        .modal-dialog {
+            background: white;
+            border-radius: var(--radius-xl);
+            width: 100%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-xl);
+            animation: slideUp 0.3s cubic-bezier(0.22, 0.61, 0.36, 1);
+            position: relative;
+        }
+        .modal-dialog.wide {
+            max-width: 800px;
+        }
+        .modal-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--gray-200);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 5;
+            border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+        }
+        .modal-header h2 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--gray-900);
+            letter-spacing: -0.01em;
+        }
+        .modal-close {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: none;
+            background: var(--gray-100);
+            cursor: pointer;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            color: var(--gray-600);
+            flex-shrink: 0;
+        }
+        .modal-close:hover {
+            background: var(--gray-200);
+            color: var(--gray-900);
+        }
+        .modal-body {
+            padding: 20px 24px;
+        }
+        .modal-footer {
+            padding: 16px 24px;
+            border-top: 1px solid var(--gray-200);
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            position: sticky;
+            bottom: 0;
+            background: white;
+            border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+        }
+        .form-group {
+            margin-bottom: 16px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: var(--gray-700);
+            margin-bottom: 5px;
+            letter-spacing: 0.01em;
+        }
+        .form-group input[type="text"],
+        .form-group input[type="number"] {
+            width: 100%;
+            padding: 11px 14px;
+            border: 2px solid var(--gray-200);
+            border-radius: var(--radius);
+            font-size: 0.9rem;
+            transition: var(--transition);
+            background: var(--gray-50);
+            color: var(--gray-900);
+            outline: none;
+            font-family: inherit;
+        }
+        .form-group input:focus {
+            border-color: var(--green-400);
+            box-shadow: 0 0 0 3px rgba(45, 122, 70, 0.08);
+            background: white;
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        @media (max-width: 500px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+        .photo-upload-area {
+            border: 2px dashed var(--gray-300);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            background: var(--gray-25);
+            position: relative;
+            min-height: 130px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .photo-upload-area:hover {
+            border-color: var(--green-400);
+            background: var(--green-25);
+        }
+        .photo-upload-area.has-photo {
+            border-style: solid;
+            border-color: var(--green-300);
+            background: var(--green-25);
+            padding: 8px;
+        }
+        .photo-upload-area .upload-icon {
+            font-size: 2.5rem;
+            color: var(--gray-400);
+        }
+        .photo-upload-area.has-photo .upload-icon {
+            display: none;
+        }
+        .photo-upload-area .upload-text {
+            font-size: 0.85rem;
+            color: var(--gray-500);
+            font-weight: 500;
+        }
+        .photo-upload-area.has-photo .upload-text {
+            display: none;
+        }
+        .photo-upload-area img {
+            max-width: 100%;
+            max-height: 220px;
+            border-radius: var(--radius);
+            object-fit: contain;
+        }
+        .photo-upload-area input[type="file"] {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+        .btn-save {
+            padding: 11px 28px;
+            border-radius: 50px;
+            border: none;
+            background: var(--green-700);
+            color: white;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 0.9rem;
+            transition: var(--transition);
+            letter-spacing: 0.01em;
+            box-shadow: var(--shadow);
+        }
+        .btn-save:hover {
+            background: var(--green-600);
+            box-shadow: var(--shadow-md);
+        }
+        .btn-cancel {
+            padding: 11px 22px;
+            border-radius: 50px;
+            border: 2px solid var(--gray-200);
+            background: white;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: var(--transition);
+            color: var(--gray-600);
+        }
+        .btn-cancel:hover {
+            background: var(--gray-50);
+            border-color: var(--gray-300);
+        }
+        .btn-danger {
+            padding: 10px 22px;
+            border-radius: 50px;
+            border: none;
+            background: var(--red-500);
+            color: white;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 0.88rem;
+            transition: var(--transition);
+        }
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        /* ============ PHOTO MODAL ============ */
+        .photo-modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.88);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 30px;
+            cursor: pointer;
+            animation: fadeIn 0.2s ease;
+        }
+        .photo-modal-overlay img {
+            max-width: 92vw;
+            max-height: 90vh;
+            border-radius: var(--radius-lg);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
+            object-fit: contain;
+            animation: zoomIn 0.3s cubic-bezier(0.22, 0.61, 0.36, 1);
+            cursor: default;
+        }
+        @keyframes zoomIn {
+            from {
+                opacity: 0;
+                transform: scale(0.85);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        .photo-modal-close {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.15);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            font-size: 1.3rem;
+            cursor: pointer;
+            z-index: 2001;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            backdrop-filter: blur(6px);
+        }
+        .photo-modal-close:hover {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* ============ TOAST ============ */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 3000;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            pointer-events: none;
+        }
+        .toast {
+            padding: 13px 20px;
+            border-radius: var(--radius);
+            color: white;
+            font-weight: 600;
+            font-size: 0.85rem;
+            box-shadow: var(--shadow-lg);
+            animation: slideInRight 0.35s cubic-bezier(0.22, 0.61, 0.36, 1),
+                fadeOut 0.3s ease 2.5s forwards;
+            pointer-events: auto;
+            letter-spacing: 0.01em;
+            max-width: 380px;
+        }
+        .toast-success {
+            background: var(--green-700);
+        }
+        .toast-warning {
+            background: var(--amber-500);
+            color: #1a1a1a;
+        }
+        .toast-error {
+            background: var(--red-500);
+        }
+        .toast-info {
+            background: var(--blue-500);
+        }
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        @keyframes fadeOut {
+            to {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+        }
+
+        /* ============ RESPONSIVE ============ */
+        @media (max-width: 768px) {
+            .header {
+                padding: 0 14px;
+                height: auto;
+                flex-wrap: wrap;
+                padding-top: 10px;
+                padding-bottom: 10px;
+                gap: 8px;
+            }
+            .header h1 {
+                font-size: 1rem;
+            }
+            .header-stats {
+                gap: 6px;
+            }
+            .stat-pill {
+                font-size: 0.7rem;
+                padding: 5px 10px;
+            }
+            .cards-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+            .toolbar {
+                gap: 8px;
+            }
+            .btn-add {
+                width: 100%;
+                justify-content: center;
+            }
+            .search-box {
+                max-width: 100%;
+                width: 100%;
+            }
+            .filter-btns {
+                width: 100%;
+                justify-content: flex-start;
+            }
+            .card-photo-wrapper {
+                height: 180px;
+            }
+            .modal-dialog {
+                max-width: 95vw;
+                margin: 0 5px;
+                border-radius: var(--radius-lg);
+            }
+        }
+        @media (max-width: 400px) {
+            .card-actions {
+                gap: 4px;
+            }
+            .btn-action {
+                padding: 6px 10px;
+                font-size: 0.7rem;
+                gap: 3px;
+            }
+            .header h1 {
+                font-size: 0.85rem;
+            }
+            .header-icon {
+                width: 32px;
+                height: 32px;
+                font-size: 16px;
+            }
+        }
+
+        /* Scrollbar estilizada */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--gray-300);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--gray-400);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ==================== HEADER ==================== -->
+    <header class="header">
+        <div class="header-logo">
+            <div class="header-icon">📦</div>
+            <h1>
+                Estoque de Não Conformidade
+                <span>(DIMEP)</span>
+            </h1>
+        </div>
+        <div class="header-stats" id="headerStats">
+            <div class="stat-pill"><span class="dot dot-pendente"></span> Pendentes: <strong id="countPendente">0</strong></div>
+            <div class="stat-pill"><span class="dot dot-refugo"></span> Refugo: <strong id="countRefugo">0</strong></div>
+            <div class="stat-pill"><span class="dot dot-retrabalho"></span> Retrabalho: <strong id="countRetrabalho">0</strong></div>
+            <div class="stat-pill" style="background:rgba(255,255,255,0.2);">Total: <strong id="countTotal">0</strong></div>
+        </div>
+    </header>
+
+    <!-- ==================== MAIN ==================== -->
+    <div class="main-container">
+        <!-- Toolbar -->
+        <div class="toolbar">
+            <div class="toolbar-left">
+                <div class="search-box">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="searchInput" placeholder="Buscar por produto, armazém ou endereço..." autocomplete="off">
+                </div>
+                <div class="filter-btns" id="filterBtns">
+                    <button class="filter-btn active" data-filter="todos">📋 Todos</button>
+                    <button class="filter-btn" data-filter="pendente">⚠️ Pendentes</button>
+                    <button class="filter-btn" data-filter="refugo">🗑️ Refugo</button>
+                    <button class="filter-btn" data-filter="retrabalho">🔧 Retrabalho</button>
+                </div>
+            </div>
+            <button class="btn-add" id="btnAddItem">
+                <span class="plus-icon">+</span> Adicionar Item
+            </button>
+        </div>
+
+        <!-- Cards Grid -->
+        <div class="cards-grid" id="cardsGrid">
+            <!-- Renderizado dinamicamente -->
+        </div>
+    </div>
+
+    <!-- ==================== MODAL: FORMULÁRIO (Adicionar/Editar) ==================== -->
+    <div class="modal-overlay" id="modalFormOverlay" style="display:none;">
+        <div class="modal-dialog" id="modalFormDialog">
+            <div class="modal-header">
+                <h2 id="modalFormTitle">Adicionar Item</h2>
+                <button class="modal-close" id="btnCloseFormModal">✕</button>
+            </div>
+            <div class="modal-body">
+                <form id="itemForm" autocomplete="off">
+                    <input type="hidden" id="itemId" value="">
+                    <input type="hidden" id="existingPhoto" value="">
+                    <div class="form-group">
+                        <label for="produto">🏷️ Produto *</label>
+                        <input type="text" id="produto" placeholder="Nome do produto / material" required maxlength="120">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="armazem">🏭 Armazém *</label>
+                            <input type="text" id="armazem" placeholder="Ex: Depósito A" required maxlength="80">
+                        </div>
+                        <div class="form-group">
+                            <label for="endereco">📍 Endereço *</label>
+                            <input type="text" id="endereco" placeholder="Ex: Rua 3, Prateleira B" required maxlength="80">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="quantidade">📊 Quantidade *</label>
+                        <input type="number" id="quantidade" placeholder="Quantidade de itens" required min="1" max="99999" value="1">
+                    </div>
+                    <div class="form-group">
+                        <label>📸 Foto da Localidade</label>
+                        <div class="photo-upload-area" id="photoUploadArea">
+                            <span class="upload-icon">📷</span>
+                            <span class="upload-text">Clique para selecionar uma foto<br><small style="opacity:0.6;">(opcional, formatos JPG/PNG)</small></span>
+                            <img id="photoPreview" src="" alt="Preview" style="display:none;">
+                            <input type="file" id="photoInput" accept="image/jpeg,image/png,image/webp,image/gif">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-cancel" id="btnCancelForm">Cancelar</button>
+                <button type="button" class="btn-save" id="btnSaveItem">💾 Salvar Item</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== MODAL: FOTO AMPLIADA ==================== -->
+    <div class="photo-modal-overlay" id="photoModalOverlay" style="display:none;">
+        <button class="photo-modal-close" id="btnClosePhotoModal">✕</button>
+        <img src="" alt="Foto ampliada" id="photoModalImg">
+    </div>
+
+    <!-- ==================== MODAL: CONFIRMAÇÃO DE EXCLUSÃO ==================== -->
+    <div class="modal-overlay" id="modalConfirmOverlay" style="display:none;">
+        <div class="modal-dialog" style="max-width:420px; text-align:center;">
+            <div class="modal-header" style="border-bottom:none; justify-content:center;">
+                <h2 style="font-size:1.1rem;">🗑️ Confirmar Exclusão</h2>
+            </div>
+            <div class="modal-body" style="padding-bottom:8px;">
+                <p style="color:var(--gray-600);font-size:0.9rem;">Tem certeza que deseja excluir este item?</p>
+                <p style="color:var(--red-500);font-weight:600;font-size:0.85rem;" id="confirmItemName"></p>
+                <p style="color:var(--gray-400);font-size:0.75rem;">Esta ação não pode ser desfeita.</p>
+            </div>
+            <div class="modal-footer" style="border-top:none; justify-content:center; gap:12px;">
+                <button class="btn-cancel" id="btnCancelConfirm">Cancelar</button>
+                <button class="btn-danger" id="btnConfirmDelete">🗑️ Excluir Permanentemente</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== TOAST CONTAINER ==================== -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script>
+        (function() {
+            // ============ CONSTANTES ============
+            const STORAGE_KEY = 'estoque_dimep_data';
+            const MAX_IMAGE_WIDTH = 600;
+            const MAX_IMAGE_HEIGHT = 600;
+            const IMAGE_QUALITY = 0.6;
+
+            // ============ ESTADO ============
+            let items = [];
+            let currentFilter = 'todos';
+            let searchTerm = '';
+            let itemIdToDelete = null;
+
+            // ============ ELEMENTOS DOM ============
+            const cardsGrid = document.getElementById('cardsGrid');
+            const searchInput = document.getElementById('searchInput');
+            const filterBtns = document.getElementById('filterBtns');
+            const btnAddItem = document.getElementById('btnAddItem');
+            const modalFormOverlay = document.getElementById('modalFormOverlay');
+            const modalFormTitle = document.getElementById('modalFormTitle');
+            const itemForm = document.getElementById('itemForm');
+            const itemIdInput = document.getElementById('itemId');
+            const existingPhotoInput = document.getElementById('existingPhoto');
+            const produtoInput = document.getElementById('produto');
+            const armazemInput = document.getElementById('armazem');
+            const enderecoInput = document.getElementById('endereco');
+            const quantidadeInput = document.getElementById('quantidade');
+            const photoInput = document.getElementById('photoInput');
+            const photoPreview = document.getElementById('photoPreview');
+            const photoUploadArea = document.getElementById('photoUploadArea');
+            const btnSaveItem = document.getElementById('btnSaveItem');
+            const btnCancelForm = document.getElementById('btnCancelForm');
+            const btnCloseFormModal = document.getElementById('btnCloseFormModal');
+            const photoModalOverlay = document.getElementById('photoModalOverlay');
+            const photoModalImg = document.getElementById('photoModalImg');
+            const btnClosePhotoModal = document.getElementById('btnClosePhotoModal');
+            const modalConfirmOverlay = document.getElementById('modalConfirmOverlay');
+            const confirmItemName = document.getElementById('confirmItemName');
+            const btnCancelConfirm = document.getElementById('btnCancelConfirm');
+            const btnConfirmDelete = document.getElementById('btnConfirmDelete');
+            const toastContainer = document.getElementById('toastContainer');
+            const countPendente = document.getElementById('countPendente');
+            const countRefugo = document.getElementById('countRefugo');
+            const countRetrabalho = document.getElementById('countRetrabalho');
+            const countTotal = document.getElementById('countTotal');
+
+            // ============ PERSISTÊNCIA ============
+            function loadItems() {
+                try {
+                    const raw = localStorage.getItem(STORAGE_KEY);
+                    items = raw ? JSON.parse(raw) : [];
+                    if (!Array.isArray(items)) items = [];
+                } catch (e) {
+                    items = [];
+                    console.warn('Erro ao carregar dados do localStorage:', e);
+                }
+            }
+
+            function saveItems() {
+                try {
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+                } catch (e) {
+                    showToast('⚠️ Erro ao salvar: armazenamento cheio. Tente remover alguns itens.', 'error');
+                    console.error('Erro ao salvar no localStorage:', e);
+                }
+            }
+
+            // ============ COMPRESSÃO DE IMAGEM ============
+            function compressImage(file) {
+                return new Promise((resolve, reject) => {
+                    if (!file || !file.type.startsWith('image/')) {
+                        resolve(null);
+                        return;
+                    }
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const img = new Image();
+                        img.onload = function() {
+                            let w = img.width;
+                            let h = img.height;
+                            if (w <= MAX_IMAGE_WIDTH && h <= MAX_IMAGE_HEIGHT) {
+                                resolve(e.target.result);
+                                return;
+                            }
+                            const ratio = Math.min(MAX_IMAGE_WIDTH / w, MAX_IMAGE_HEIGHT / h);
+                            w = Math.round(w * ratio);
+                            h = Math.round(h * ratio);
+                            const canvas = document.createElement('canvas');
+                            canvas.width = w;
+                            canvas.height = h;
+                            const ctx = canvas.getContext('2d');
+                            ctx.drawImage(img, 0, 0, w, h);
+                            resolve(canvas.toDataURL('image/jpeg', IMAGE_QUALITY));
+                        };
+                        img.onerror = function() {
+                            reject(new Error('Erro ao carregar imagem'));
+                        };
+                        img.src = e.target.result;
+                    };
+                    reader.onerror = function() {
+                        reject(new Error('Erro ao ler arquivo'));
+                    };
+                    reader.readAsDataURL(file);
+                });
+            }
+
+            // ============ TOAST ============
+            function showToast(message, type = 'success') {
+                const toast = document.createElement('div');
+                toast.className = `toast toast-${type}`;
+                toast.textContent = message;
+                toastContainer.appendChild(toast);
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.remove();
+                    }
+                }, 3000);
+            }
+
+            // ============ MODAIS ============
+            function openFormModal(itemId = null) {
+                if (itemId) {
+                    modalFormTitle.textContent = '✏️ Editar Item';
+                    const item = items.find(i => i.id === itemId);
+                    if (!item) return;
+                    itemIdInput.value = item.id;
+                    produtoInput.value = item.produto;
+                    armazemInput.value = item.armazem;
+                    enderecoInput.value = item.endereco;
+                    quantidadeInput.value = item.quantidade;
+                    existingPhotoInput.value = item.foto || '';
+                    if (item.foto) {
+                        photoPreview.src = item.foto;
+                        photoPreview.style.display = 'block';
+                        photoUploadArea.classList.add('has-photo');
+                    } else {
+                        photoPreview.src = '';
+                        photoPreview.style.display = 'none';
+                        photoUploadArea.classList.remove('has-photo');
+                    }
+                } else {
+                    modalFormTitle.textContent = '📦 Adicionar Novo Item';
+                    itemIdInput.value = '';
+                    produtoInput.value = '';
+                    armazemInput.value = '';
+                    enderecoInput.value = '';
+                    quantidadeInput.value = '1';
+                    existingPhotoInput.value = '';
+                    photoPreview.src = '';
+                    photoPreview.style.display = 'none';
+                    photoUploadArea.classList.remove('has-photo');
+                }
+                photoInput.value = '';
+                modalFormOverlay.style.display = 'flex';
+                setTimeout(() => produtoInput.focus(), 150);
+            }
+
+            function closeFormModal() {
+                modalFormOverlay.style.display = 'none';
+                itemForm.reset();
+                itemIdInput.value = '';
+                existingPhotoInput.value = '';
+                photoPreview.src = '';
+                photoPreview.style.display = 'none';
+                photoUploadArea.classList.remove('has-photo');
+                photoInput.value = '';
+            }
+
+            function openPhotoModal(imageSrc) {
+                if (!imageSrc) return;
+                photoModalImg.src = imageSrc;
+                photoModalOverlay.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closePhotoModal() {
+                photoModalOverlay.style.display = 'none';
+                photoModalImg.src = '';
+                document.body.style.overflow = '';
+            }
+
+            function openConfirmModal(itemId) {
+                itemIdToDelete = itemId;
+                const item = items.find(i => i.id === itemId);
+                if (item) {
+                    confirmItemName.textContent = `"${item.produto}" - ${item.armazem} / ${item.endereco}`;
+                }
+                modalConfirmOverlay.style.display = 'flex';
+            }
+
+            function closeConfirmModal() {
+                modalConfirmOverlay.style.display = 'none';
+                itemIdToDelete = null;
+            }
+
+            // ============ CRUD ============
+            function generateId() {
+                return 'item_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            }
+
+            async function addItem(data, photoFile) {
+                let fotoBase64 = data.existingPhoto || '';
+                if (photoFile && photoFile.size > 0) {
+                    try {
+                        fotoBase64 = await compressImage(photoFile);
+                        if (!fotoBase64) fotoBase64 = '';
+                    } catch (e) {
+                        showToast('⚠️ Erro ao processar imagem. Item salvo sem foto.', 'warning');
+                        fotoBase64 = '';
+                    }
+                }
+                const newItem = {
+                    id: generateId(),
+                    produto: data.produto.trim(),
+                    armazem: data.armazem.trim(),
+                    endereco: data.endereco.trim(),
+                    quantidade: parseInt(data.quantidade, 10) || 1,
+                    foto: fotoBase64,
+                    status: 'pendente',
+                    dataCriacao: new Date().toISOString(),
+                };
+                items.unshift(newItem);
+                saveItems();
+                renderAll();
+                showToast('✅ Item adicionado com sucesso!', 'success');
+            }
+
+            function updateItem(id, data, photoFile) {
+                const index = items.findIndex(i => i.id === id);
+                if (index === -1) return;
+                const updateData = async () => {
+                    let fotoBase64 = data.existingPhoto || '';
+                    if (photoFile && photoFile.size > 0) {
+                        try {
+                            fotoBase64 = await compressImage(photoFile);
+                            if (!fotoBase64) fotoBase64 = data.existingPhoto || '';
+                        } catch (e) {
+                            fotoBase64 = data.existingPhoto || '';
+                            showToast('⚠️ Erro ao processar nova imagem. Mantida foto anterior.', 'warning');
+                        }
+                    }
+                    items[index].produto = data.produto.trim();
+                    items[index].armazem = data.armazem.trim();
+                    items[index].endereco = data.endereco.trim();
+                    items[index].quantidade = parseInt(data.quantidade, 10) || 1;
+                    items[index].foto = fotoBase64;
+                    saveItems();
+                    renderAll();
+                    showToast('✅ Item atualizado com sucesso!', 'success');
+                };
+                updateData();
+            }
+
+            function deleteItem(id) {
+                items = items.filter(i => i.id !== id);
+                saveItems();
+                renderAll();
+                showToast('🗑️ Item excluído permanentemente.', 'info');
+            }
+
+            function changeStatus(id, newStatus) {
+                const item = items.find(i => i.id === id);
+                if (!item) return;
+                const oldStatus = item.status;
+                item.status = newStatus;
+                saveItems();
+                renderAll();
+                const statusLabels = { pendente: 'Pendente', refugo: 'Refugo', retrabalho: 'Retrabalho' };
+                showToast(`🔄 Status alterado para "${statusLabels[newStatus]}".`, 'info');
+            }
+
+            // ============ RENDERIZAÇÃO ============
+            function getFilteredItems() {
+                let filtered = [...items];
+                if (currentFilter !== 'todos') {
+                    filtered = filtered.filter(i => i.status === currentFilter);
+                }
+                if (searchTerm.trim()) {
+                    const term = searchTerm.trim().toLowerCase();
+                    filtered = filtered.filter(i =>
+                        i.produto.toLowerCase().includes(term) ||
+                        i.armazem.toLowerCase().includes(term) ||
+                        i.endereco.toLowerCase().includes(term)
+                    );
+                }
+                return filtered;
+            }
+
+            function updateHeaderStats() {
+                const total = items.length;
+                const pendentes = items.filter(i => i.status === 'pendente').length;
+                const refugos = items.filter(i => i.status === 'refugo').length;
+                const retrabalhos = items.filter(i => i.status === 'retrabalho').length;
+                countPendente.textContent = pendentes;
+                countRefugo.textContent = refugos;
+                countRetrabalho.textContent = retrabalhos;
+                countTotal.textContent = total;
+            }
+
+            function formatDate(isoString) {
+                try {
+                    const date = new Date(isoString);
+                    const day = String(date.getDate()).padStart(2, '0');
+                    const month = String(date.getMonth() + 1).padStart(2, '0');
+                    const year = date.getFullYear();
+                    const hours = String(date.getHours()).padStart(2, '0');
+                    const minutes = String(date.getMinutes()).padStart(2, '0');
+                    return `${day}/${month}/${year} ${hours}:${minutes}`;
+                } catch (e) {
+                    return 'Data inválida';
+                }
+            }
+
+            function statusBadgeClass(status) {
+                const map = { pendente: 'badge-pendente', refugo: 'badge-refugo', retrabalho: 'badge-retrabalho' };
+                return map[status] || 'badge-pendente';
+            }
+
+            function statusLabel(status) {
+                const map = { pendente: 'Pendente', refugo: 'Refugo', retrabalho: 'Retrabalho' };
+                return map[status] || 'Pendente';
+            }
+
+            function renderCards() {
+                const filtered = getFilteredItems();
+                if (filtered.length === 0) {
+                    cardsGrid.innerHTML = `
+                            <div class="empty-state">
+                                <div class="empty-icon">📭</div>
+                                <h3>Nenhum item encontrado</h3>
+                                <p>${items.length === 0 ? 'Clique em "Adicionar Item" para começar.' : 'Tente ajustar os filtros ou a busca.'}</p>
+                            </div>`;
+                } else {
+                    cardsGrid.innerHTML = filtered.map(item => `
+                            <div class="card status-${item.status}" data-id="${item.id}">
+                                <div class="card-photo-wrapper" data-action="view-photo" data-photo="${item.foto ? '1' : '0'}" data-id="${item.id}">
+                                    ${item.foto
+                                        ? `<img src="${item.foto}" alt="Foto de ${escapeHTML(item.produto)}" loading="lazy">
+                                           <div class="photo-overlay">🔍</div>`
+                                        : `<div class="card-photo-placeholder">📦</div>`
+                                    }
+                                    <span class="card-badge ${statusBadgeClass(item.status)}">${statusLabel(item.status)}</span>
+                                </div>
+                                <div class="card-body">
+                                    <h3 title="${escapeHTML(item.produto)}">${escapeHTML(truncate(item.produto, 50))}</h3>
+                                    <div class="card-info-row">
+                                        <span class="info-item"><span class="info-icon">🏭</span> ${escapeHTML(truncate(item.armazem, 30))}</span>
+                                        <span class="info-item"><span class="info-icon">📍</span> ${escapeHTML(truncate(item.endereco, 30))}</span>
+                                    </div>
+                                    <span class="card-quantity">📊 Qtd: ${item.quantidade}</span>
+                                    <span class="card-date">📅 ${formatDate(item.dataCriacao)}</span>
+                                </div>
+                                <div class="card-actions">
+                                    <button class="btn-action btn-edit" data-action="edit" data-id="${item.id}">✏️ Editar</button>
+                                    ${item.status !== 'refugo' ? `<button class="btn-action btn-refugo" data-action="refugo" data-id="${item.id}">🗑️ Refugo</button>` : ''}
+                                    ${item.status !== 'retrabalho' ? `<button class="btn-action btn-retrabalho" data-action="retrabalho" data-id="${item.id}">🔧 Retrabalho</button>` : ''}
+                                    ${item.status !== 'pendente' ? `<button class="btn-action btn-edit" data-action="pendente" data-id="${item.id}" style="color:#f59e0b;border-color:#fde68a;background:#fffbeb;">↩️ Reverter</button>` : ''}
+                                    <button class="btn-action btn-delete" data-action="delete" data-id="${item.id}">❌ Excluir</button>
+                                </div>
+                            </div>
+                        `).join('');
+                }
+                updateHeaderStats();
+            }
+
+            function escapeHTML(str) {
+                const div = document.createElement('div');
+                div.textContent = str;
+                return div.innerHTML;
+            }
+
+            function truncate(str, maxLen) {
+                if (str.length <= maxLen) return str;
+                return str.substring(0, maxLen - 3) + '...';
+            }
+
+            function renderAll() {
+                renderCards();
+            }
+
+            // ============ EVENT DELEGATION PARA CARDS ============
+            cardsGrid.addEventListener('click', function(e) {
+                const target = e.target.closest('[data-action]');
+                if (!target) return;
+                const action = target.getAttribute('data-action');
+                const id = target.getAttribute('data-id');
+
+                if (action === 'view-photo') {
+                    const hasPhoto = target.getAttribute('data-photo');
+                    if (hasPhoto === '1') {
+                        const item = items.find(i => i.id === id);
+                        if (item && item.foto) {
+                            openPhotoModal(item.foto);
+                        }
+                    }
+                    return;
+                }
+                if (action === 'edit') {
+                    openFormModal(id);
+                    return;
+                }
+                if (action === 'refugo') {
+                    changeStatus(id, 'refugo');
+                    return;
+                }
+                if (action === 'retrabalho') {
+                    changeStatus(id, 'retrabalho');
+                    return;
+                }
+                if (action === 'pendente') {
+                    changeStatus(id, 'pendente');
+                    return;
+                }
+                if (action === 'delete') {
+                    openConfirmModal(id);
+                    return;
+                }
+            });
+
+            // Também permite clicar na wrapper da foto
+            cardsGrid.addEventListener('click', function(e) {
+                const wrapper = e.target.closest('.card-photo-wrapper');
+                if (!wrapper) return;
+                const id = wrapper.getAttribute('data-id');
+                const hasPhoto = wrapper.getAttribute('data-photo');
+                if (hasPhoto === '1' && id) {
+                    const item = items.find(i => i.id === id);
+                    if (item && item.foto) {
+                        openPhotoModal(item.foto);
+                    }
+                }
+            });
+
+            // ============ EVENT LISTENERS ============
+            btnAddItem.addEventListener('click', () => openFormModal(null));
+
+            btnCloseFormModal.addEventListener('click', closeFormModal);
+            btnCancelForm.addEventListener('click', closeFormModal);
+            modalFormOverlay.addEventListener('click', function(e) {
+                if (e.target === modalFormOverlay) closeFormModal();
+            });
+
+            btnSaveItem.addEventListener('click', async function() {
+                const produto = produtoInput.value.trim();
+                const armazem = armazemInput.value.trim();
+                const endereco = enderecoInput.value.trim();
+                const quantidade = parseInt(quantidadeInput.value, 10);
+
+                if (!produto) {
+                    showToast('⚠️ O campo "Produto" é obrigatório.', 'warning');
+                    produtoInput.focus();
+                    return;
+                }
+                if (!armazem) {
+                    showToast('⚠️ O campo "Armazém" é obrigatório.', 'warning');
+                    armazemInput.focus();
+                    return;
+                }
+                if (!endereco) {
+                    showToast('⚠️ O campo "Endereço" é obrigatório.', 'warning');
+                    enderecoInput.focus();
+                    return;
+                }
+                if (isNaN(quantidade) || quantidade < 1) {
+                    showToast('⚠️ A quantidade deve ser pelo menos 1.', 'warning');
+                    quantidadeInput.focus();
+                    return;
+                }
+
+                const data = {
+                    produto,
+                    armazem,
+                    endereco,
+                    quantidade,
+                    existingPhoto: existingPhotoInput.value,
+                };
+                const photoFile = photoInput.files[0] || null;
+                const editId = itemIdInput.value;
+
+                if (editId) {
+                    await updateItem(editId, data, photoFile);
+                } else {
+                    await addItem(data, photoFile);
+                }
+                closeFormModal();
+            });
+
+            // Preview da foto no upload
+            photoInput.addEventListener('change', function() {
+                const file = photoInput.files[0];
+                if (file && file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        photoPreview.src = e.target.result;
+                        photoPreview.style.display = 'block';
+                        photoUploadArea.classList.add('has-photo');
+                    };
+                    reader.readAsDataURL(file);
+                } else if (!file && existingPhotoInput.value) {
+                    photoPreview.src = existingPhotoInput.value;
+                    photoPreview.style.display = 'block';
+                    photoUploadArea.classList.add('has-photo');
+                } else {
+                    photoPreview.src = '';
+                    photoPreview.style.display = 'none';
+                    photoUploadArea.classList.remove('has-photo');
+                }
+            });
+
+            // Modal de foto ampliada
+            btnClosePhotoModal.addEventListener('click', closePhotoModal);
+            photoModalOverlay.addEventListener('click', function(e) {
+                if (e.target === photoModalOverlay) closePhotoModal();
+            });
+
+            // Modal de confirmação
+            btnCancelConfirm.addEventListener('click', closeConfirmModal);
+            modalConfirmOverlay.addEventListener('click', function(e) {
+                if (e.target === modalConfirmOverlay) closeConfirmModal();
+            });
+            btnConfirmDelete.addEventListener('click', function() {
+                if (itemIdToDelete) {
+                    deleteItem(itemIdToDelete);
+                }
+                closeConfirmModal();
+            });
+
+            // Busca
+            searchInput.addEventListener('input', function() {
+                searchTerm = searchInput.value;
+                renderCards();
+            });
+
+            // Filtros
+            filterBtns.addEventListener('click', function(e) {
+                const btn = e.target.closest('.filter-btn');
+                if (!btn) return;
+                currentFilter = btn.getAttribute('data-filter');
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove(
+                'active'));
+                btn.classList.add('active');
+                renderCards();
+            });
+
+            // Fechar modais com tecla ESC
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    if (photoModalOverlay.style.display === 'flex') {
+                        closePhotoModal();
+                    } else if (modalConfirmOverlay.style.display === 'flex') {
+                        closeConfirmModal();
+                    } else if (modalFormOverlay.style.display === 'flex') {
+                        closeFormModal();
+                    }
+                }
+            });
+
+            // ============ INICIALIZAÇÃO ============
+            function init() {
+                loadItems();
+                renderAll();
+                if (items.length === 0) {
+                    console.log('📦 ESTOQUE DE NÃO CONFORMIDADE (DIMEP) - Pronto para uso.');
+                }
+            }
+
+            init();
+        })();
+    </script>
+</body>
+</html>
