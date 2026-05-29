@@ -1097,14 +1097,16 @@
 
     <script>
         (function() {
-            // ============ CONFIGURAÇÃO FIREBASE ============
+            // ============ CONFIGURAÇÃO FIREBASE (ATUALIZADA) ============
             const firebaseConfig = {
-                apiKey: "AIzaSyC_LtQbuGX8-de2ouMu8DHX-PicWyepAic",
-                authDomain: "estoquedimep.firebaseapp.com",
-                projectId: "estoquedimep",
-                storageBucket: "estoquedimep.firebasestorage.app",
-                messagingSenderId: "464649699304",
-                appId: "1:464649699304:web:e4472b4917c8471dc4ee5d"
+                apiKey: "AIzaSyB2Lmd4ldNh9nLUTmROed38i_Of9jl37Aw",
+                authDomain: "estoque-f7eea.firebaseapp.com",
+                databaseURL: "https://estoque-f7eea-default-rtdb.firebaseio.com",
+                projectId: "estoque-f7eea",
+                storageBucket: "estoque-f7eea.firebasestorage.app",
+                messagingSenderId: "1096590609630",
+                appId: "1:1096590609630:web:9257889033140666b1c64f",
+                measurementId: "G-YDHLRS6DVV"
             };
 
             firebase.initializeApp(firebaseConfig);
@@ -1704,7 +1706,7 @@
             // ============ INICIALIZAÇÃO ============
             function init() {
                 loadItemsRealtime();
-                console.log('📦 ESTOQUE DE NÃO CONFORMIDADE (DIMEP) - Conectado ao Firebase.');
+                console.log('📦 ESTOQUE DE NÃO CONFORMIDADE (DIMEP) - Conectado ao Firebase (estoque-f7eea).');
             }
 
             init();
